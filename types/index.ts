@@ -15,6 +15,6 @@ export type Deal = {
   value: number; stage: DealStage; assignee_id: string; due_date: string
 }
 export type Activity = {
-  id: string; lead_id: string; type: ActivityType
+  id: string; workspace_id: string; lead_id: string; type: ActivityType
   description: string; author_id: string; created_at: string
 }

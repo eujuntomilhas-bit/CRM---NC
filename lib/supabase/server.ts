@@ -17,8 +17,12 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
             )
-          } catch {
-            // Server Component — cookies set by middleware
+          } catch (error) {
+            // Expected in Server Components — cookies can only be set by middleware.
+            // Re-throw unexpected errors.
+            if (!(error instanceof Error && error.message.includes('cookies'))) {
+              throw error
+            }
           }
         },
       },
