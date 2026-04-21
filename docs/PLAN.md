@@ -135,17 +135,17 @@ git commit -m "chore(M0): project setup — Next.js 14, shadcn/ui, Supabase clie
 
 ### Entregas
 
-- [ ] Criar `app/(app)/layout.tsx` — layout com sidebar fixa + área de conteúdo scrollável
-- [ ] Criar `components/shared/Sidebar.tsx` — links: Dashboard, Leads, Pipeline, Configurações; ativo destacado com `usePathname()`
-- [ ] Criar `components/shared/WorkspaceSwitcher.tsx` — dropdown com workspaces mockados + "Criar workspace"
-- [ ] Criar `components/shared/UserMenu.tsx` — avatar + nome + dropdown: Perfil, Plano, Sair
-- [ ] Criar páginas placeholder:
+- [x] Criar `app/(app)/layout.tsx` — layout com sidebar fixa + área de conteúdo scrollável
+- [x] Criar `components/shared/Sidebar.tsx` — links: Dashboard, Leads, Pipeline, Configurações; ativo destacado com `usePathname()`
+- [x] Criar `components/shared/WorkspaceSwitcher.tsx` — dropdown com workspaces mockados + "Criar workspace"
+- [x] Criar `components/shared/UserMenu.tsx` — avatar + nome + dropdown: Perfil, Plano, Sair
+- [x] Criar páginas placeholder:
   - `app/(app)/dashboard/page.tsx`
   - `app/(app)/leads/page.tsx`
   - `app/(app)/pipeline/page.tsx`
   - `app/(app)/settings/page.tsx`
-- [ ] Sidebar responsiva: gaveta em mobile com botão hambúrguer (`Sheet` do shadcn)
-- [ ] Cor ativa na sidebar: `bg-indigo-50 text-indigo-700`
+- [x] Sidebar responsiva: gaveta em mobile com botão hambúrguer (`Sheet` do shadcn)
+- [x] Cor ativa na sidebar: `bg-indigo-50 text-indigo-700`
 
 ### Commit Final
 ```bash
