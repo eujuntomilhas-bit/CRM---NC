@@ -19,23 +19,26 @@ export default function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
-      <div className="flex h-14 items-center gap-2 px-4">
-        <div className="flex size-7 items-center justify-center rounded-md bg-indigo-600">
-          <span className="text-xs font-bold text-white">C</span>
+    <aside className="flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar">
+      <div className="flex h-14 items-center gap-2.5 px-4">
+        <div className="flex size-7 items-center justify-center rounded-lg bg-primary">
+          <span className="text-xs font-bold text-primary-foreground">C</span>
         </div>
-        <span className="text-base font-semibold text-gray-900">CRM-NC</span>
+        <span className="text-sm font-semibold text-sidebar-foreground">CRM-NC</span>
       </div>
 
-      <Separator />
+      <Separator className="bg-sidebar-border" />
 
-      <div className="px-3 py-3">
+      <div className="px-3 py-2">
         <WorkspaceSwitcher />
       </div>
 
-      <Separator />
+      <Separator className="bg-sidebar-border" />
 
       <nav className="flex-1 px-3 py-3">
+        <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+          Menu
+        </p>
         <ul className="space-y-0.5">
           {NAV_LINKS.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + "/")
@@ -46,11 +49,16 @@ export default function Sidebar() {
                   className={cn(
                     "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors",
                     active
-                      ? "bg-indigo-50 text-indigo-700 font-medium"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-sidebar-primary/15 text-sidebar-primary font-medium"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
-                  <Icon className="size-4 shrink-0" />
+                  <Icon
+                    className={cn(
+                      "size-4 shrink-0",
+                      active ? "text-sidebar-primary" : "text-sidebar-foreground/50"
+                    )}
+                  />
                   {label}
                 </Link>
               </li>
@@ -59,7 +67,7 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      <Separator />
+      <Separator className="bg-sidebar-border" />
 
       <div className="px-3 py-3">
         <UserMenu />
