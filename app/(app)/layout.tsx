@@ -14,7 +14,7 @@ export default function AppLayout({ children }: Props) {
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
         <MobileSidebar />
-        <TopBar />
+        <TopBar className="hidden md:flex" />
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
     </div>

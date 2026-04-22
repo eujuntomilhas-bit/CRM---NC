@@ -12,13 +12,15 @@ const PAGE_TITLES: Record<string, { title: string; description: string }> = {
   "/settings": { title: "Configurações", description: "Gerencie sua conta e workspace" },
 }
 
-export default function TopBar() {
+import { cn } from "@/lib/utils"
+
+export default function TopBar({ className }: { className?: string }) {
   const pathname = usePathname()
   const segment = "/" + (pathname.split("/")[1] ?? "")
   const page = PAGE_TITLES[segment] ?? { title: "CRM-NC", description: "" }
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-background px-6">
+    <header className={cn("flex h-14 shrink-0 items-center justify-between border-b border-border bg-background px-6", className)}>
       <div className="flex flex-col justify-center">
         <h1 className="text-sm font-semibold text-foreground">{page.title}</h1>
         {page.description && (
