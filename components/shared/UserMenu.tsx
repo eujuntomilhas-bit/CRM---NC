@@ -5,9 +5,10 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
@@ -39,19 +40,21 @@ export default function UserMenu() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="w-56" side="right" align="end">
-        <DropdownMenuLabel className="flex flex-col gap-0.5">
-          <span className="text-sm font-medium">{MOCK_USER.name}</span>
-          <span className="text-xs font-normal text-muted-foreground">{MOCK_USER.email}</span>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2">
-          <User className="size-4" />
-          <span>Perfil</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
-          <CreditCard className="size-4" />
-          <span>Meu Plano</span>
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex flex-col gap-0.5">
+            <span className="text-sm font-medium text-foreground">{MOCK_USER.name}</span>
+            <span className="text-xs font-normal text-muted-foreground">{MOCK_USER.email}</span>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="gap-2">
+            <User className="size-4" />
+            <span>Perfil</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="gap-2">
+            <CreditCard className="size-4" />
+            <span>Meu Plano</span>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" className="gap-2">
           <LogOut className="size-4" />

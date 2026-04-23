@@ -43,12 +43,12 @@ Cada milestone tem branch própria, objetivo, lista de entregas com checkbox e c
 
 ### Entregas
 
-- [ ] Criar projeto Next.js 14 com App Router e TypeScript strict:
+- [x] Criar projeto Next.js 14 com App Router e TypeScript strict:
   ```bash
   npx create-next-app@latest crm-nc --typescript --tailwind --app --src-dir=false --import-alias="@/*"
   ```
-- [ ] Confirmar `tsconfig.json` com `"strict": true`
-- [ ] Instalar dependências:
+- [x] Confirmar `tsconfig.json` com `"strict": true`
+- [x] Instalar dependências:
   ```bash
   npm install @supabase/supabase-js @supabase/ssr
   npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
@@ -56,12 +56,12 @@ Cada milestone tem branch própria, objetivo, lista de entregas com checkbox e c
   npm install resend
   npm install stripe @stripe/stripe-js
   ```
-- [ ] Instalar e inicializar shadcn/ui:
+- [x] Instalar e inicializar shadcn/ui:
   ```bash
   npx shadcn@latest init
   npx shadcn@latest add button input card dialog dropdown-menu badge avatar separator label textarea select sonner
   ```
-- [ ] Criar estrutura de pastas:
+- [x] Criar estrutura de pastas:
   ```
   app/(auth)/             ← login, signup, onboarding
   app/(app)/              ← dashboard, leads, pipeline, settings
@@ -81,9 +81,9 @@ Cada milestone tem branch própria, objetivo, lista de entregas com checkbox e c
   supabase/migrations/
   supabase/functions/
   ```
-- [ ] Criar `lib/supabase/client.ts` (browser client)
-- [ ] Criar `lib/supabase/server.ts` (server client com cookies SSR)
-- [ ] Criar `types/index.ts` com tipos globais:
+- [x] Criar `lib/supabase/client.ts` (browser client)
+- [x] Criar `lib/supabase/server.ts` (server client com cookies SSR)
+- [x] Criar `types/index.ts` com tipos globais:
   ```ts
   export type LeadStatus = 'novo' | 'contato' | 'proposta' | 'negociacao' | 'ganho' | 'perdido'
   export type DealStage = 'novo' | 'contato' | 'proposta' | 'negociacao' | 'ganho' | 'perdido'
@@ -102,11 +102,11 @@ Cada milestone tem branch própria, objetivo, lista de entregas com checkbox e c
     value: number; stage: DealStage; assignee_id: string; due_date: string
   }
   export type Activity = {
-    id: string; lead_id: string; type: ActivityType
+    id: string; workspace_id: string; lead_id: string; type: ActivityType
     description: string; author_id: string; created_at: string
   }
   ```
-- [ ] Criar `.env.local.example`:
+- [x] Criar `.env.local.example`:
   ```
   NEXT_PUBLIC_SUPABASE_URL=
   NEXT_PUBLIC_SUPABASE_ANON_KEY=
@@ -118,7 +118,7 @@ Cada milestone tem branch própria, objetivo, lista de entregas com checkbox e c
   RESEND_API_KEY=
   NEXT_PUBLIC_APP_URL=http://localhost:3000
   ```
-- [ ] Verificar `npm run dev` sem erros
+- [x] Verificar `npm run dev` sem erros
 
 ### Commit Final
 ```bash
@@ -147,6 +147,18 @@ git commit -m "chore(M0): project setup — Next.js 14, shadcn/ui, Supabase clie
 - [x] Sidebar responsiva: gaveta em mobile com botão hambúrguer (`Sheet` do shadcn)
 - [x] Cor ativa na sidebar: `bg-indigo-50 text-indigo-700`
 
+### Extras entregues na Aula 2.1 — Design System
+- [x] Dark mode como padrão (`dark` no `<html>`, tema indigo/slate em `globals.css`)
+- [x] `postcss.config.mjs` criado — Tailwind v4 gerando utilities corretamente
+- [x] `components/shared/TopBar.tsx` — barra superior com título da página e notificações
+- [x] `components/shared/AuthCard.tsx` — card base reutilizável para telas de auth
+- [x] Sidebar usa tokens CSS semânticos (`sidebar-*`) sem hardcode de cores
+- [x] WorkspaceSwitcher com badge Pro e 3 workspaces fake
+- [x] UserMenu com role, e-mail e dropdown lateral
+- [x] MobileSidebar: Sheet com `bg-sidebar`, botão X, fecha ao clicar em link
+- [x] `app/page.tsx` redireciona `/` → `/dashboard`
+- [x] Corrigido bug `MenuGroupRootContext`: `DropdownMenuLabel` agora sempre dentro de `DropdownMenuGroup`
+
 ### Commit Final
 ```bash
 git add .
@@ -163,7 +175,7 @@ git commit -m "feat(M1): app shell — sidebar, workspace switcher, user menu, p
 ### Entregas
 
 - [ ] Criar `app/(auth)/layout.tsx` — layout centrado com logo e card branco
-- [ ] Criar `components/shared/AuthCard.tsx` — card com logo, título e slot de children
+- [x] Criar `components/shared/AuthCard.tsx` — card com logo, título e slot de children
 - [ ] Criar `app/(auth)/login/page.tsx` — form: e-mail + senha + link signup + "Esqueci senha"
 - [ ] Criar `app/(auth)/signup/page.tsx` — form: nome + e-mail + senha + confirmação + link login
 - [ ] Criar `app/(auth)/onboarding/page.tsx` — wizard 2 passos:

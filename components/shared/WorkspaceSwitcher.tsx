@@ -6,9 +6,10 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
@@ -41,32 +42,34 @@ export default function WorkspaceSwitcher() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="w-60" align="start">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">
-          Workspaces
-        </DropdownMenuLabel>
-        {MOCK_WORKSPACES.map((ws) => (
-          <DropdownMenuItem
-            key={ws.id}
-            onClick={() => setCurrent(ws)}
-            className="gap-2"
-          >
-            <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[10px] font-bold uppercase text-muted-foreground">
-              {ws.name[0]}
-            </div>
-            <span className="flex-1 truncate">{ws.name}</span>
-            {ws.plan === "pro" && (
-              <Badge variant="secondary" className="h-4 px-1 text-[9px] font-semibold uppercase">
-                Pro
-              </Badge>
-            )}
-            <Check
-              className={cn(
-                "size-3.5 text-primary",
-                ws.id === current.id ? "opacity-100" : "opacity-0"
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="text-xs text-muted-foreground">
+            Workspaces
+          </DropdownMenuLabel>
+          {MOCK_WORKSPACES.map((ws) => (
+            <DropdownMenuItem
+              key={ws.id}
+              onClick={() => setCurrent(ws)}
+              className="gap-2"
+            >
+              <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[10px] font-bold uppercase text-muted-foreground">
+                {ws.name[0]}
+              </div>
+              <span className="flex-1 truncate">{ws.name}</span>
+              {ws.plan === "pro" && (
+                <Badge variant="secondary" className="h-4 px-1 text-[9px] font-semibold uppercase">
+                  Pro
+                </Badge>
               )}
-            />
-          </DropdownMenuItem>
-        ))}
+              <Check
+                className={cn(
+                  "size-3.5 text-primary",
+                  ws.id === current.id ? "opacity-100" : "opacity-0"
+                )}
+              />
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="gap-2 text-muted-foreground">
           <Plus className="size-4" />
