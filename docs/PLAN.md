@@ -174,16 +174,16 @@ git commit -m "feat(M1): app shell — sidebar, workspace switcher, user menu, p
 
 ### Entregas
 
-- [ ] Criar `app/(auth)/layout.tsx` — layout centrado com logo e card branco
+- [x] Criar `app/(auth)/layout.tsx` — layout centrado com logo e card branco
 - [x] Criar `components/shared/AuthCard.tsx` — card com logo, título e slot de children
-- [ ] Criar `app/(auth)/login/page.tsx` — form: e-mail + senha + link signup + "Esqueci senha"
-- [ ] Criar `app/(auth)/signup/page.tsx` — form: nome + e-mail + senha + confirmação + link login
-- [ ] Criar `app/(auth)/onboarding/page.tsx` — wizard 2 passos:
+- [x] Criar `app/(auth)/login/page.tsx` — form: e-mail + senha + link signup + "Esqueci senha"
+- [x] Criar `app/(auth)/signup/page.tsx` — form: nome + e-mail + senha + confirmação + link login
+- [x] Criar `app/(auth)/onboarding/page.tsx` — wizard 2 passos:
   - Passo 1: "Criar workspace" — nome da empresa
   - Passo 2: "Convidar equipe" — input e-mail + botão "Pular por agora"
-- [ ] Validação client-side: campos obrigatórios, e-mail válido, senha mínimo 8 chars, senhas iguais
-- [ ] Estado de loading no botão de submit (spinner + disabled)
-- [ ] Página `app/(auth)/forgot-password/page.tsx` — form de e-mail
+- [x] Validação client-side: campos obrigatórios, e-mail válido, senha mínimo 8 chars, senhas iguais
+- [x] Estado de loading no botão de submit (spinner + disabled)
+- [x] Página `app/(auth)/forgot-password/page.tsx` — form de e-mail
 
 ### Commit Final
 ```bash
