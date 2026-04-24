@@ -8,7 +8,7 @@ export type Workspace = { id: string; name: string; slug: string; plan: Workspac
 export type Lead = {
   id: string; workspace_id: string; name: string; email: string
   phone: string; company: string; role: string; status: LeadStatus
-  assignee_id: string; created_at: string
+  assignee_id: string; estimated_value: number; notes: string; created_at: string
 }
 export type Deal = {
   id: string; workspace_id: string; lead_id: string; title: string
