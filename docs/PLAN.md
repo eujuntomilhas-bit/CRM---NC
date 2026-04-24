@@ -203,7 +203,7 @@ git commit -m "feat(M2): auth UI — login, signup, onboarding wizard, forgot pa
 - [ ] Criar `lib/mocks/leads.ts` — 10 leads + 5 atividades mockados com variação de status/tipo
 - [ ] Criar `components/leads/LeadCard.tsx` — card: nome, empresa, status badge colorido, responsável
 - [ ] Criar `components/leads/LeadFilters.tsx` — search input + select status + select responsável
-- [ ] Criar `components/leads/LeadForm.tsx` — dialog/sheet com form completo (todos campos do tipo Lead)
+- [ ] Criar `components/leads/LeadForm.tsx` — dialog/sheet com form completo (todos campos do tipo Lead) + campo `estimated_value` (valor estimado em R$) + campo `notes`
 - [ ] Criar `components/leads/ActivityTimeline.tsx` — lista cronológica com ícone por tipo (📞 ligação, 📧 e-mail, 📅 reunião, 📝 nota)
 - [ ] Criar `components/leads/ActivityForm.tsx` — form inline: select tipo + textarea descrição + botão salvar
 - [ ] Atualizar `app/(app)/leads/page.tsx` — tabela/grid + botão "Novo Lead" + filtros + CRUD mockado
