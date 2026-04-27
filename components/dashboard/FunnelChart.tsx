@@ -16,11 +16,11 @@ import type { mockFunnel } from "@/lib/mocks/metrics"
 type FunnelRow = (typeof mockFunnel)[number]
 
 const STAGE_COLORS: Record<string, string> = {
-  novo:        "#94a3b8",
-  contato:     "#60a5fa",
-  proposta:    "#fbbf24",
-  negociacao:  "#fb923c",
-  ganho:       "#34d399",
+  novo:       "#94a3b8",
+  contato:    "#60a5fa",
+  proposta:   "#fbbf24",
+  negociacao: "#fb923c",
+  ganho:      "#34d399",
 }
 
 type TooltipPayload = {
@@ -71,28 +71,24 @@ export default function FunnelChart({ data, className }: Props) {
       <ResponsiveContainer width="100%" height={220}>
         <BarChart
           data={data}
-          layout="vertical"
-          margin={{ top: 0, right: 16, bottom: 0, left: 0 }}
-          barSize={22}
+          margin={{ top: 8, right: 8, bottom: 0, left: 8 }}
+          barSize={36}
         >
           <XAxis
-            type="number"
-            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            dataKey="label"
+            tick={{ fontSize: 11, fill: "#ffffff", fontWeight: 500 }}
+            tickLine={false}
+            axisLine={false}
+          />
+          <YAxis
+            tick={{ fontSize: 10, fill: "rgba(255,255,255,0.4)" }}
             tickLine={false}
             axisLine={false}
             allowDecimals={false}
-            domain={[0, "dataMax + 1"]}
-          />
-          <YAxis
-            type="category"
-            dataKey="label"
-            width={96}
-            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-            tickLine={false}
-            axisLine={false}
+            width={20}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
-          <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+          <Bar dataKey="count" radius={[4, 4, 0, 0]}>
             {data.map((row) => (
               <Cell
                 key={row.stage}
