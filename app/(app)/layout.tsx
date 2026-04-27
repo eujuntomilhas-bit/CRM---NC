@@ -15,7 +15,7 @@ export default function AppLayout({ children }: Props) {
       <div className="flex flex-1 flex-col overflow-hidden">
         <MobileSidebar />
         <TopBar className="hidden md:flex" />
-        <main className="flex-1 overflow-hidden p-6 flex flex-col min-h-0">{children}</main>
+        <main className="flex-1 overflow-hidden p-6 flex flex-col min-h-0 animate-page-enter">{children}</main>
       </div>
     </div>
   )

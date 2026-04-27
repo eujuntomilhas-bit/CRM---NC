@@ -37,19 +37,19 @@ export default function MetricCard({ icon, label, value, format, delta, deltaLab
   const isNegative = delta !== undefined && delta < 0
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-5">
+    <div className="glass-card flex flex-col gap-3 rounded-xl p-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground/60">
+        <p className="font-mono-design text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/60">
           {label}
         </p>
-        <div className="rounded-lg bg-white/5 p-2 text-muted-foreground">
+        <div className="rounded-lg p-2 text-muted-foreground" style={{ background: "rgba(202,255,51,0.07)" }}>
           {icon}
         </div>
       </div>
 
       {/* Value */}
-      <p className="font-mono text-2xl font-bold tabular-nums text-foreground">
+      <p className="font-heading text-2xl font-bold tabular-nums text-foreground">
         {formatted ?? "—"}
       </p>
 

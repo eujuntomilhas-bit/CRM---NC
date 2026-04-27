@@ -27,7 +27,7 @@ export default function LeadCard({ lead, onEdit, onDelete }: Props) {
   const initials = lead.name.split(" ").map((n) => n[0]).slice(0, 2).join("")
 
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent/40">
+    <div className="glass-card flex items-start justify-between gap-4 rounded-xl p-4">
       <Link href={`/leads/${lead.id}`} className="flex min-w-0 flex-1 items-start gap-3">
         <Avatar className="size-10 shrink-0">
           <AvatarFallback className="text-xs font-semibold">{initials}</AvatarFallback>

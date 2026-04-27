@@ -109,7 +109,7 @@ export default function KanbanColumn({
   }, [totalValue])
 
   return (
-    <div className="flex min-h-0 w-[264px] shrink-0 flex-col self-stretch">
+    <div className="flex min-h-0 w-full shrink-0 flex-col self-stretch">
       {/* ── Column header ── */}
       <div className="mb-2.5 space-y-2 px-0.5">
         {/* Top row: label + count */}

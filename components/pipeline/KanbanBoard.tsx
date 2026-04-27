@@ -142,16 +142,21 @@ export default function KanbanBoard({
       onDragEnd={handleDragEnd}
     >
       <div className={cn("flex min-h-0 gap-3 overflow-x-auto pb-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_transparent]", className)}>
-        {STAGES.map((stage) => (
-          <KanbanColumn
+        {STAGES.map((stage, i) => (
+          <div
             key={stage}
-            stage={stage}
-            deals={deals.filter((d) => d.stage === stage)}
-            leads={mockLeads}
-            users={MOCK_USERS}
-            onAddDeal={onAddDeal}
-            onClickDeal={onClickDeal}
-          />
+            className="animate-fade-slide-up flex min-h-0 flex-col"
+            style={{ animationDelay: `${i * 80}ms`, flex: "0 0 264px" }}
+          >
+            <KanbanColumn
+              stage={stage}
+              deals={deals.filter((d) => d.stage === stage)}
+              leads={mockLeads}
+              users={MOCK_USERS}
+              onAddDeal={onAddDeal}
+              onClickDeal={onClickDeal}
+            />
+          </div>
         ))}
       </div>
 

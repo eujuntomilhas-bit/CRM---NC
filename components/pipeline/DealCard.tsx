@@ -101,9 +101,8 @@ function CardBody({
         isDraggable ? "cursor-grab active:cursor-grabbing" : "cursor-pointer",
         accentClass,
         !isDragging && !overlay && [
-          "hover:-translate-y-0.5",
-          "hover:border-border/80",
-          "hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.45)]",
+          "hover:-translate-y-1",
+          "hover:shadow-[0_6px_24px_-4px_rgba(0,0,0,0.5)]",
         ],
         isDragging && !overlay && "opacity-30 scale-[0.97] shadow-none",
         overlay && [
