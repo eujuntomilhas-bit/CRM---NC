@@ -80,7 +80,7 @@ export default function Stats() {
                 style={{ cursor: "default" }}
               >
                 <p
-                  className="font-heading text-4xl font-extrabold tabular-nums md:text-5xl"
+                  className="font-heading text-3xl font-extrabold tabular-nums sm:text-4xl md:text-5xl"
                   style={{ color: "#CAFF33" }}
                 >
                   <CountUp stat={stat} />

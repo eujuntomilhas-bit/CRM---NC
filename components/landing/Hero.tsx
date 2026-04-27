@@ -69,10 +69,10 @@ export default function Hero() {
       </p>
 
       {/* CTAs */}
-      <div className="animate-fade-slide-up-3 relative z-10 mt-10 flex flex-wrap items-center justify-center gap-4">
+      <div className="animate-fade-slide-up-3 relative z-10 mt-10 flex w-full max-w-xs flex-col items-center gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
         <Link
           href="/signup"
-          className="group flex items-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold transition-all duration-200 hover:-translate-y-0.5"
+          className="group flex w-full items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-sm font-bold transition-all duration-200 hover:-translate-y-0.5 sm:w-auto"
           style={{
             background: "#CAFF33",
             color: "#0C0C0E",
@@ -89,7 +89,7 @@ export default function Hero() {
         </Link>
         <Link
           href="/login"
-          className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-medium text-muted-foreground backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/8 hover:text-foreground"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-sm font-medium text-muted-foreground backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:text-foreground sm:w-auto"
         >
           <Play className="size-3.5 fill-current" />
           Ver demonstração
