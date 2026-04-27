@@ -1,6 +1,16 @@
 {
   "version": 1,
   "skills": {
+    "brief-to-tasks": {
+      "source": "julianoczkowski/designer-skills",
+      "sourceType": "github",
+      "computedHash": "cbd77e26117e83bd41094bf09023b8a86b569eff4272c723cbd73830729117f2"
+    },
+    "design-brief": {
+      "source": "julianoczkowski/designer-skills",
+      "sourceType": "github",
+      "computedHash": "756a4c8be21bb8a6c237958d61060f31bdfcc0360fa42bf86f719c0263da942d"
+    },
     "stripe-best-practices": {
       "source": "stripe/ai",
       "sourceType": "github",
