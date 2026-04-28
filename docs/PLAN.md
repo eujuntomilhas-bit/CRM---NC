@@ -319,7 +319,10 @@ git commit -m "feat(M6): landing page — hero, features, pricing, footer (publi
 - [x] Criar `supabase/apply_all.sql` — script consolidado para aplicar no SQL Editor do Supabase Studio
 - [x] Criar `types/supabase.ts` — tipos TypeScript completos (Row/Insert/Update) para todas as tabelas
 - [x] Atualizar `lib/supabase/client.ts` e `server.ts` com generic `Database` para type-safety
-- [ ] Aplicar migrations no Supabase Studio (aguardando execução manual de `supabase/apply_all.sql`)
+- [x] Aplicar migrations no Supabase Studio — `apply_all.sql` executado com sucesso (schema + RLS + indexes)
+- [x] Seed aplicado — 1 workspace, 5 leads, 4 deals, 3 activities inseridos
+- [x] RLS verificado — acesso anon retorna 0 rows em todas as tabelas
+- [x] Build verificado — TypeScript sem erros, 12 páginas geradas
 - [ ] Criar `proxy.ts` na raiz — proteger `/(app)/*`, redirecionar `/login` se sem sessão
 - [ ] Conectar `app/(auth)/login/page.tsx` a `supabase.auth.signInWithPassword()` → redirect `/dashboard`
 - [ ] Conectar `app/(auth)/signup/page.tsx` a `supabase.auth.signUp()`
