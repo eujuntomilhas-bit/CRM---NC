@@ -61,7 +61,7 @@ export default function LeadDetailPage({ params }: { params: Promise<{ id: strin
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 overflow-auto space-y-6">
       <Link
         href="/leads"
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"

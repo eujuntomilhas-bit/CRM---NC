@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils"
+import Logo from "./Logo"
 
 type Props = {
   title: string
@@ -11,15 +12,15 @@ export default function AuthCard({ title, description, children, className }: Pr
   return (
     <div className={cn("w-full max-w-md", className)}>
       <div className="mb-8 flex flex-col items-center text-center">
-        <div className="mb-4 flex size-10 items-center justify-center rounded-xl bg-primary">
-          <span className="text-sm font-bold text-primary-foreground">C</span>
+        <div className="mb-5">
+          <Logo size="md" />
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h1>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">{title}</h1>
         {description && (
           <p className="mt-1.5 text-sm text-muted-foreground">{description}</p>
         )}
       </div>
-      <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <div className="glass-card rounded-2xl p-8">
         {children}
       </div>
     </div>

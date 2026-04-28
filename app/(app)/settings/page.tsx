@@ -1,6 +1,6 @@
 export default function SettingsPage() {
   return (
-    <div className="space-y-6">
+    <div className="flex-1 overflow-auto space-y-6">
       <div>
         <h2 className="text-lg font-semibold text-foreground">Configurações</h2>
         <p className="text-sm text-muted-foreground">Gerencie seu workspace e conta</p>

@@ -60,10 +60,10 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="flex-1 overflow-auto space-y-6">
+      <div className="flex items-center justify-between animate-fade-slide-up">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Leads</h2>
+          <h2 className="font-heading text-xl font-bold text-foreground">Leads</h2>
           <p className="text-sm text-muted-foreground">
             {leads.length} contato{leads.length !== 1 ? "s" : ""} no workspace
           </p>

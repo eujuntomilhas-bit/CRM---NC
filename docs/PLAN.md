@@ -200,15 +200,15 @@ git commit -m "feat(M2): auth UI — login, signup, onboarding wizard, forgot pa
 
 ### Entregas
 
-- [ ] Criar `lib/mocks/leads.ts` — 10 leads + 5 atividades mockados com variação de status/tipo
-- [ ] Criar `components/leads/LeadCard.tsx` — card: nome, empresa, status badge colorido, responsável
-- [ ] Criar `components/leads/LeadFilters.tsx` — search input + select status + select responsável
-- [ ] Criar `components/leads/LeadForm.tsx` — dialog/sheet com form completo (todos campos do tipo Lead) + campo `estimated_value` (valor estimado em R$) + campo `notes`
-- [ ] Criar `components/leads/ActivityTimeline.tsx` — lista cronológica com ícone por tipo (📞 ligação, 📧 e-mail, 📅 reunião, 📝 nota)
-- [ ] Criar `components/leads/ActivityForm.tsx` — form inline: select tipo + textarea descrição + botão salvar
-- [ ] Atualizar `app/(app)/leads/page.tsx` — tabela/grid + botão "Novo Lead" + filtros + CRUD mockado
-- [ ] Criar `app/(app)/leads/[id]/page.tsx` — perfil completo do lead + `ActivityTimeline` + `ActivityForm`
-- [ ] Badge de status: `ganho`=verde, `perdido`=vermelho, outros=azul/cinza
+- [x] Criar `lib/mocks/leads.ts` — 10 leads + 5 atividades mockados com variação de status/tipo
+- [x] Criar `components/leads/LeadCard.tsx` — card: nome, empresa, status badge colorido, responsável
+- [x] Criar `components/leads/LeadFilters.tsx` — search input + select status + select responsável
+- [x] Criar `components/leads/LeadForm.tsx` — dialog/sheet com form completo (todos campos do tipo Lead) + campo `estimated_value` (valor estimado em R$) + campo `notes`
+- [x] Criar `components/leads/ActivityTimeline.tsx` — lista cronológica com ícone por tipo (📞 ligação, 📧 e-mail, 📅 reunião, 📝 nota)
+- [x] Criar `components/leads/ActivityForm.tsx` — form inline: select tipo + textarea descrição + botão salvar
+- [x] Atualizar `app/(app)/leads/page.tsx` — tabela/grid + botão "Novo Lead" + filtros + CRUD mockado
+- [x] Criar `app/(app)/leads/[id]/page.tsx` — perfil completo do lead + `ActivityTimeline` + `ActivityForm`
+- [x] Badge de status: `ganho`=verde, `perdido`=vermelho, outros=azul/cinza
 
 ### Commit Final
 ```bash
@@ -225,18 +225,18 @@ git commit -m "feat(M3): leads UI — list, filters, detail, form, activity time
 
 ### Entregas
 
-- [ ] Criar `lib/mocks/deals.ts` — 12 deals distribuídos entre as 6 colunas
-- [ ] Criar `components/pipeline/DealCard.tsx` — card: título, valor em R$, nome do lead, responsável, prazo; drag handle
-- [ ] Criar `components/pipeline/KanbanColumn.tsx` — header com nome + soma em R$ + `useDroppable`; lista de `DealCard` com `SortableContext`
-- [ ] Criar `components/pipeline/KanbanBoard.tsx`:
+- [x] Criar `lib/mocks/deals.ts` — 12 deals distribuídos entre as 6 colunas
+- [x] Criar `components/pipeline/DealCard.tsx` — card: título, valor em R$, nome do lead, responsável, prazo; drag handle
+- [x] Criar `components/pipeline/KanbanColumn.tsx` — header com nome + soma em R$ + `useDroppable`; lista de `DealCard` com `SortableContext`
+- [x] Criar `components/pipeline/KanbanBoard.tsx`:
   ```tsx
   // DndContext + DragOverlay + 6 KanbanColumns
   // onDragEnd: atualiza stage do deal no state local
   // sensors: PointerSensor com activationConstraint distance: 8
   ```
-- [ ] Atualizar `app/(app)/pipeline/page.tsx` — renderiza `KanbanBoard` com state de deals
-- [ ] Dialog "Novo Negócio": título, valor, lead (select), responsável, prazo
-- [ ] Cores de coluna: Novo=slate, Contato=blue, Proposta=yellow, Negociação=orange, Ganho=green, Perdido=red
+- [x] Atualizar `app/(app)/pipeline/page.tsx` — renderiza `KanbanBoard` com state de deals
+- [x] Dialog "Novo Negócio": título, valor, lead (select), responsável, prazo
+- [x] Cores de coluna: Novo=slate, Contato=blue, Proposta=yellow, Negociação=orange, Ganho=green, Perdido=red
 
 ### Commit Final
 ```bash
@@ -253,7 +253,7 @@ git commit -m "feat(M4): pipeline UI — kanban board, @dnd-kit drag-and-drop, d
 
 ### Entregas
 
-- [ ] Criar `lib/mocks/metrics.ts`:
+- [x] Criar `lib/mocks/metrics.ts`:
   ```ts
   export const mockMetrics = {
     total_leads: 47, open_deals: 12,
@@ -267,10 +267,10 @@ git commit -m "feat(M4): pipeline UI — kanban board, @dnd-kit drag-and-drop, d
     { stage: 'Ganho', count: 2, value: 2500 },
   ]
   ```
-- [ ] Criar `components/dashboard/MetricCard.tsx` — ícone + label + valor grande + variação (verde/vermelho)
-- [ ] Criar `components/dashboard/FunnelChart.tsx` — `BarChart` Recharts horizontal com tooltip de valor em R$
-- [ ] Criar `components/dashboard/UpcomingDeals.tsx` — tabela compacta: título + valor + prazo + badge estágio
-- [ ] Atualizar `app/(app)/dashboard/page.tsx`:
+- [x] Criar `components/dashboard/MetricCard.tsx` — ícone + label + valor grande + variação (verde/vermelho)
+- [x] Criar `components/dashboard/FunnelChart.tsx` — `BarChart` Recharts vertical com tooltip de valor em R$
+- [x] Criar `components/dashboard/UpcomingDeals.tsx` — tabela compacta: título + valor + prazo + badge estágio
+- [x] Atualizar `app/(app)/dashboard/page.tsx`:
   - Linha 1: grid 4 colunas — `MetricCard` ×4 (total leads, negócios abertos, valor pipeline, conversão)
   - Linha 2: `FunnelChart` (col-span-2) + `UpcomingDeals` (col-span-1)
 
@@ -289,13 +289,13 @@ git commit -m "feat(M5): dashboard UI — metric cards, funnel chart, upcoming d
 
 ### Entregas
 
-- [ ] Criar `components/landing/Navbar.tsx` — logo + links "Entrar" e "Começar grátis"
-- [ ] Criar `components/landing/Hero.tsx` — headline forte, subheadline, CTA primário (signup) + secundário (ver demo)
-- [ ] Criar `components/landing/Features.tsx` — grid 3×2 com ícones: Pipeline Kanban, Gestão de Leads, Dashboard, Multi-empresa, Histórico, Plano Gratuito
-- [ ] Criar `components/landing/Pricing.tsx` — 2 cards: Free (R$0) e Pro (R$49/mês) com lista de benefícios e CTA
-- [ ] Criar `components/landing/Footer.tsx` — copyright + links básicos
-- [ ] Atualizar `app/page.tsx` — montar seções em ordem: Navbar → Hero → Features → Pricing → Footer
-- [ ] Responsivo mobile-first: tudo funciona em 375px
+- [x] Criar `components/landing/Navbar.tsx` — logo + links "Entrar" e "Começar grátis"
+- [x] Criar `components/landing/Hero.tsx` — headline forte, subheadline, CTA primário (signup) + secundário (ver demo)
+- [x] Criar `components/landing/Features.tsx` — grid 3×2 com ícones: Pipeline Kanban, Gestão de Leads, Dashboard, Multi-empresa, Histórico, Plano Gratuito
+- [x] Criar `components/landing/Pricing.tsx` — 2 cards: Free (R$0) e Pro (R$49/mês) com lista de benefícios e CTA
+- [x] Criar `components/landing/Footer.tsx` — copyright + links básicos
+- [x] Atualizar `app/page.tsx` — montar seções em ordem: Navbar → Hero → Features → Pricing → Footer
+- [x] Responsivo mobile-first: tudo funciona em 375px
 
 ### Commit Final
 ```bash

@@ -123,8 +123,99 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-dm-sans), var(--font-geist-sans), sans-serif;
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* ── Design System: fontes semânticas ── */
+.font-heading {
+  font-family: var(--font-syne), sans-serif;
+}
+.font-mono-design {
+  font-family: var(--font-ibm-plex-mono), monospace;
+}
+
+/* ── Keyframes ── */
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(25px, -15px) scale(1.05); }
+  66%       { transform: translate(-15px, 10px) scale(0.97); }
+}
+
+@keyframes waveScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes flowPulse {
+  0%, 100% { opacity: 0.3; transform: scaleX(0.5); }
+  50%       { opacity: 1;   transform: scaleX(1); }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ── Animation utilities ── */
+.animate-orb-float   { animation: orbFloat  10s ease-in-out infinite; }
+.animate-wave-scroll { animation: waveScroll 14s linear     infinite; }
+.animate-flow-pulse  { animation: flowPulse  3s ease-in-out infinite; }
+.animate-page-enter  { animation: pageEnter 0.35s ease-out both; }
+
+.animate-fade-slide-up          { animation: fadeSlideUp 0.4s ease-out both; }
+.animate-fade-slide-up-1        { animation: fadeSlideUp 0.4s ease-out 0.1s both; }
+.animate-fade-slide-up-2        { animation: fadeSlideUp 0.4s ease-out 0.2s both; }
+.animate-fade-slide-up-3        { animation: fadeSlideUp 0.4s ease-out 0.3s both; }
+
+/* ── Glassmorphism card ── */
+.glass-card {
+  background: rgba(20, 20, 22, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(202, 255, 51, 0.1);
+  transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+.glass-card:hover {
+  border-color: rgba(202, 255, 51, 0.28);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(202, 255, 51, 0.07);
+}
+
+/* ── Orb decorativo ── */
+.design-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+/* ── Reduced motion override ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-orb-float,
+  .animate-wave-scroll,
+  .animate-flow-pulse,
+  .animate-page-enter,
+  .animate-fade-slide-up,
+  .animate-fade-slide-up-1,
+  .animate-fade-slide-up-2,
+  .animate-fade-slide-up-3 {
+    animation: none !important;
+  }
+  .glass-card:hover {
+    transform: none;
   }
 }

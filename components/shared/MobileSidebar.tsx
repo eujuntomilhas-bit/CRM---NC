@@ -10,6 +10,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import Sidebar from "./Sidebar"
+import Logo from "./Logo"
 
 export default function MobileSidebar() {
   const [open, setOpen] = useState(false)
@@ -26,11 +27,8 @@ export default function MobileSidebar() {
           <Menu className="size-5" />
           <span className="sr-only">Abrir menu</span>
         </Button>
-        <div className="ml-2 flex items-center gap-2">
-          <div className="flex size-6 items-center justify-center rounded-md bg-primary">
-            <span className="text-[10px] font-bold text-primary-foreground">C</span>
-          </div>
-          <span className="text-sm font-semibold text-foreground">CRM-NC</span>
+        <div className="ml-2">
+          <Logo size="sm" />
         </div>
       </div>
 
