@@ -289,13 +289,13 @@ git commit -m "feat(M5): dashboard UI — metric cards, funnel chart, upcoming d
 
 ### Entregas
 
-- [ ] Criar `components/landing/Navbar.tsx` — logo + links "Entrar" e "Começar grátis"
-- [ ] Criar `components/landing/Hero.tsx` — headline forte, subheadline, CTA primário (signup) + secundário (ver demo)
-- [ ] Criar `components/landing/Features.tsx` — grid 3×2 com ícones: Pipeline Kanban, Gestão de Leads, Dashboard, Multi-empresa, Histórico, Plano Gratuito
-- [ ] Criar `components/landing/Pricing.tsx` — 2 cards: Free (R$0) e Pro (R$49/mês) com lista de benefícios e CTA
-- [ ] Criar `components/landing/Footer.tsx` — copyright + links básicos
-- [ ] Atualizar `app/page.tsx` — montar seções em ordem: Navbar → Hero → Features → Pricing → Footer
-- [ ] Responsivo mobile-first: tudo funciona em 375px
+- [x] Criar `components/landing/Navbar.tsx` — logo + links "Entrar" e "Começar grátis"
+- [x] Criar `components/landing/Hero.tsx` — headline forte, subheadline, CTA primário (signup) + secundário (ver demo)
+- [x] Criar `components/landing/Features.tsx` — grid 3×2 com ícones: Pipeline Kanban, Gestão de Leads, Dashboard, Multi-empresa, Histórico, Plano Gratuito
+- [x] Criar `components/landing/Pricing.tsx` — 2 cards: Free (R$0) e Pro (R$49/mês) com lista de benefícios e CTA
+- [x] Criar `components/landing/Footer.tsx` — copyright + links básicos
+- [x] Atualizar `app/page.tsx` — montar seções em ordem: Navbar → Hero → Features → Pricing → Footer
+- [x] Responsivo mobile-first: tudo funciona em 375px
 
 ### Commit Final
 ```bash
