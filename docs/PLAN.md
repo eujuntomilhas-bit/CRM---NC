@@ -81,8 +81,8 @@ Cada milestone tem branch própria, objetivo, lista de entregas com checkbox e c
   supabase/migrations/
   supabase/functions/
   ```
-- [x] Criar `lib/supabase/client.ts` (browser client)
-- [x] Criar `lib/supabase/server.ts` (server client com cookies SSR)
+- [x] Criar `lib/supabase/client.ts` (browser client com padrão singleton)
+- [x] Criar `lib/supabase/server.ts` (server client com cookies SSR, `await cookies()`)
 - [x] Criar `types/index.ts` com tipos globais:
   ```ts
   export type LeadStatus = 'novo' | 'contato' | 'proposta' | 'negociacao' | 'ganho' | 'perdido'
