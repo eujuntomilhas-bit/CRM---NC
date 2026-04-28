@@ -312,68 +312,18 @@ git commit -m "feat(M6): landing page — hero, features, pricing, footer (publi
 
 ### Entregas
 
-- [ ] Criar `supabase/migrations/20240001_schema.sql`:
-  ```sql
-  create table workspaces (
-    id uuid primary key default gen_random_uuid(),
-    name text not null, slug text unique not null,
-    plan text not null default 'free',
-    stripe_customer_id text, stripe_subscription_id text,
-    created_at timestamptz default now()
-  );
-  create table workspace_members (
-    id uuid primary key default gen_random_uuid(),
-    workspace_id uuid references workspaces(id) on delete cascade,
-    user_id uuid references auth.users(id) on delete cascade,
-    role text not null default 'member',
-    created_at timestamptz default now(),
-    unique(workspace_id, user_id)
-  );
-  create table leads (
-    id uuid primary key default gen_random_uuid(),
-    workspace_id uuid references workspaces(id) on delete cascade,
-    name text not null, email text, phone text,
-    company text, role text, status text not null default 'novo',
-    assignee_id uuid references auth.users(id),
-    created_at timestamptz default now(), updated_at timestamptz default now()
-  );
-  create table deals (
-    id uuid primary key default gen_random_uuid(),
-    workspace_id uuid references workspaces(id) on delete cascade,
-    lead_id uuid references leads(id) on delete set null,
-    title text not null, value numeric default 0,
-    stage text not null default 'novo',
-    assignee_id uuid references auth.users(id),
-    due_date date, created_at timestamptz default now()
-  );
-  create table activities (
-    id uuid primary key default gen_random_uuid(),
-    workspace_id uuid references workspaces(id) on delete cascade,
-    lead_id uuid references leads(id) on delete cascade,
-    type text not null, description text not null,
-    author_id uuid references auth.users(id),
-    created_at timestamptz default now()
-  );
-  create table invites (
-    id uuid primary key default gen_random_uuid(),
-    workspace_id uuid references workspaces(id) on delete cascade,
-    email text not null, token text unique not null default gen_random_uuid()::text,
-    role text not null default 'member', accepted_at timestamptz,
-    created_at timestamptz default now()
-  );
-  ```
-- [ ] Criar `supabase/migrations/20240002_rls.sql` — habilitar RLS + policy "só membros do workspace" para cada tabela:
-  ```sql
-  alter table leads enable row level security;
-  create policy "workspace_members_only" on leads
-    using (workspace_id in (
-      select workspace_id from workspace_members where user_id = auth.uid()
-    ));
-  -- repetir para deals, activities, invites
-  ```
-- [ ] Criar `supabase/migrations/20240003_indexes.sql` — índices em `workspace_id`, `lead_id`, `assignee_id`
-- [ ] Criar `supabase/seed.sql` — workspace teste + admin + 5 leads + 4 deals + 3 activities
-- [ ] Criar `middleware.ts` na raiz — proteger `/(app)/*`, redirecionar `/login` se sem sessão
+- [x] Criar `supabase/migrations/20240001_schema.sql` — 6 tabelas com constraints, checks e trigger `updated_at`
+- [x] Criar `supabase/migrations/20240002_rls.sql` — RLS em todas as tabelas com funções helper `is_workspace_member` / `is_workspace_admin`; policies SELECT/INSERT/UPDATE/DELETE separadas por tabela
+- [x] Criar `supabase/migrations/20240003_indexes.sql` — 14 índices em `workspace_id`, `lead_id`, `assignee_id`, `status`, `stage`, `due_date`, `token`
+- [x] Criar `supabase/seed.sql` — workspace teste + admin + 5 leads + 4 deals + 3 activities
+- [x] Criar `supabase/apply_all.sql` — script consolidado para aplicar no SQL Editor do Supabase Studio
+- [x] Criar `types/supabase.ts` — tipos TypeScript completos (Row/Insert/Update) para todas as tabelas
+- [x] Atualizar `lib/supabase/client.ts` e `server.ts` com generic `Database` para type-safety
+- [x] Aplicar migrations no Supabase Studio — `apply_all.sql` executado com sucesso (schema + RLS + indexes)
+- [x] Seed aplicado — 1 workspace, 5 leads, 4 deals, 3 activities inseridos
+- [x] RLS verificado — acesso anon retorna 0 rows em todas as tabelas
+- [x] Build verificado — TypeScript sem erros, 12 páginas geradas
+- [ ] Criar `proxy.ts` na raiz — proteger `/(app)/*`, redirecionar `/login` se sem sessão
 - [ ] Conectar `app/(auth)/login/page.tsx` a `supabase.auth.signInWithPassword()` → redirect `/dashboard`
 - [ ] Conectar `app/(auth)/signup/page.tsx` a `supabase.auth.signUp()`
 - [ ] Criar Server Action `createWorkspace` em `app/(auth)/onboarding/actions.ts` — insere workspace + membro admin
