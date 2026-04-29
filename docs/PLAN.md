@@ -322,12 +322,17 @@ git commit -m "feat(M6): landing page — hero, features, pricing, footer (publi
 - [x] Aplicar migrations no Supabase Studio — `apply_all.sql` executado com sucesso (schema + RLS + indexes)
 - [x] Seed aplicado — 1 workspace, 5 leads, 4 deals, 3 activities inseridos
 - [x] RLS verificado — acesso anon retorna 0 rows em todas as tabelas
-- [x] Build verificado — TypeScript sem erros, 12 páginas geradas
-- [ ] Criar `proxy.ts` na raiz — proteger `/(app)/*`, redirecionar `/login` se sem sessão
-- [ ] Conectar `app/(auth)/login/page.tsx` a `supabase.auth.signInWithPassword()` → redirect `/dashboard`
-- [ ] Conectar `app/(auth)/signup/page.tsx` a `supabase.auth.signUp()`
-- [ ] Criar Server Action `createWorkspace` em `app/(auth)/onboarding/actions.ts` — insere workspace + membro admin
-- [ ] Conectar botão "Sair" do `UserMenu` a `supabase.auth.signOut()`
+- [x] Build verificado — TypeScript sem erros, 14 páginas geradas
+- [x] Criar `proxy.ts` na raiz — proteger `/(app)/*`, redirecionar `/login` se sem sessão
+- [x] Conectar `app/(auth)/login/page.tsx` a `supabase.auth.signInWithPassword()` → redirect `/dashboard`; trata `email_not_confirmed` → `/confirm-email`
+- [x] Conectar `app/(auth)/signup/page.tsx` a `supabase.auth.signUp()` com `emailRedirectTo` → redirect `/confirm-email`
+- [x] Criar `app/(auth)/confirm-email/page.tsx` — aguarda confirmação + reenvio via `supabase.auth.resend()`
+- [x] Criar `app/auth/callback/route.ts` — troca PKCE code por sessão (email confirm flow)
+- [x] Criar Server Action `createWorkspace` em `app/(auth)/onboarding/actions.ts` — RPC atômica `create_workspace_with_admin` (workspace + membro admin em uma transação)
+- [x] Conectar botão "Sair" do `UserMenu` a `supabase.auth.signOut()`
+- [x] Conectar `WorkspaceSwitcher` a dados reais (query join via `AppLayout` server component)
+- [x] Criar `supabase/migrations/20240004_rls_fix.sql` — funções helper com `(select auth.uid())` cacheado; RPC atômica `create_workspace_with_admin`
+- [x] Fluxo completo testado via API: signup → login → workspace criado → RLS verificada → logout
 
 ### Commit Final
 ```bash
