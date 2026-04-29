@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useTransition } from "react"
 import dynamic from "next/dynamic"
 import { cn } from "@/lib/utils"
 import {
@@ -19,9 +19,9 @@ import {
 import { arrayMove } from "@dnd-kit/sortable"
 import { STAGE_CONFIG } from "./KanbanColumn"
 import { DealCardOverlay } from "./DealCard"
-import { mockDeals } from "@/lib/mocks/deals"
-import { mockLeads, MOCK_USERS } from "@/lib/mocks/leads"
-import type { Deal, DealStage } from "@/types"
+import { updateDealStage } from "@/app/(app)/pipeline/actions"
+import type { Deal, DealStage, Lead } from "@/types"
+import type { DealWithLead } from "@/app/(app)/pipeline/actions"
 
 // ssr:false keeps the entire DnD tree (useSortable/useDroppable attrs) out of SSR
 const KanbanColumn = dynamic(() => import("./KanbanColumn"), { ssr: false })
@@ -40,35 +40,25 @@ const kanbanCollision: CollisionDetection = (args) => {
 }
 
 type Props = {
+  initialDeals: DealWithLead[]
+  leads: Pick<Lead, "id" | "name">[]
   onAddDeal: (stage: DealStage) => void
-  onClickDeal: (deal: Deal) => void
-  externalDeals?: Deal[]
-  onDealsChange?: (deals: Deal[]) => void
+  onClickDeal: (deal: DealWithLead) => void
   className?: string
 }
 
 export default function KanbanBoard({
+  initialDeals,
+  leads,
   onAddDeal,
   onClickDeal,
-  externalDeals,
-  onDealsChange,
   className,
 }: Props) {
-  // Use internal state when no external deals provided
-  const [internalDeals, setInternalDeals] = useState<Deal[]>(mockDeals)
+  const [deals, setDeals] = useState<DealWithLead[]>(initialDeals)
+  const [, startTransition] = useTransition()
 
-  // The active deal list: external when provided, internal otherwise
-  const deals = externalDeals ?? internalDeals
-
-  // Sync ref immediately during render (not in useEffect) so drag handlers
-  // always read the most recent deals without async lag
-  const dealsRef = useRef<Deal[]>(deals)
+  const dealsRef = useRef<DealWithLead[]>(deals)
   dealsRef.current = deals
-
-  function updateDeals(next: Deal[]) {
-    if (onDealsChange) onDealsChange(next)
-    else setInternalDeals(next)
-  }
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeDeal = deals.find((d) => d.id === activeId) ?? null
@@ -82,8 +72,6 @@ export default function KanbanBoard({
     setActiveId(active.id as string)
   }
 
-  // Move card to target column in real time while dragging over it.
-  // Reads dealsRef so it always has the current list even mid-drag.
   function handleDragOver({ active, over }: DragOverEvent) {
     if (!over) return
     const current = dealsRef.current
@@ -98,11 +86,9 @@ export default function KanbanBoard({
       : current.find((d) => d.id === overId)?.stage
 
     if (!targetStage || dragged.stage === targetStage) return
-
-    updateDeals(current.map((d) => (d.id === dragId ? { ...d, stage: targetStage } : d)))
+    setDeals(current.map((d) => (d.id === dragId ? { ...d, stage: targetStage } : d)))
   }
 
-  // Reorder within same column; cross-column move was done in onDragOver.
   function handleDragEnd({ active, over }: DragEndEvent) {
     setActiveId(null)
     if (!over) return
@@ -118,20 +104,43 @@ export default function KanbanBoard({
       ? (overId as DealStage)
       : current.find((d) => d.id === overId)?.stage
 
-    // Only reorder if dropped on a card in the same column
-    if (!targetStage || targetStage !== dragged.stage) return
-    if (dragId === overId) return
+    if (!targetStage) return
 
+    // Stage mudou via onDragOver — só persiste
+    if (targetStage !== dragged.stage) {
+      startTransition(() => { updateDealStage(dragId, dragged.stage) })
+      return
+    }
+
+    // Reordenar dentro da mesma coluna
+    if (dragId === overId) return
     const stageDeals = current.filter((d) => d.stage === targetStage)
     const oldIdx = stageDeals.findIndex((d) => d.id === dragId)
     const newIdx = stageDeals.findIndex((d) => d.id === overId)
     if (oldIdx === -1 || newIdx === -1 || oldIdx === newIdx) return
 
-    updateDeals([
+    setDeals([
       ...current.filter((d) => d.stage !== targetStage),
       ...arrayMove(stageDeals, oldIdx, newIdx),
     ])
+    startTransition(() => { updateDealStage(dragId, targetStage) })
   }
+
+  // Leads as Deal["lead_id"] lookup for KanbanColumn compatibility
+  const leadsAsFull = leads.map((l) => ({
+    id: l.id,
+    name: l.name,
+    workspace_id: "",
+    email: "",
+    phone: "",
+    company: "",
+    role: "",
+    status: "novo" as const,
+    assignee_id: "",
+    estimated_value: 0,
+    notes: "",
+    created_at: "",
+  })) satisfies Lead[]
 
   return (
     <DndContext
@@ -150,11 +159,11 @@ export default function KanbanBoard({
           >
             <KanbanColumn
               stage={stage}
-              deals={deals.filter((d) => d.stage === stage)}
-              leads={mockLeads}
-              users={MOCK_USERS}
+              deals={deals.filter((d) => d.stage === stage) as unknown as Deal[]}
+              leads={leadsAsFull}
+              users={[]}
               onAddDeal={onAddDeal}
-              onClickDeal={onClickDeal}
+              onClickDeal={(deal) => onClickDeal(deal as unknown as DealWithLead)}
             />
           </div>
         ))}
@@ -163,9 +172,9 @@ export default function KanbanBoard({
       <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
         {activeDeal && (
           <DealCardOverlay
-            deal={activeDeal}
-            leads={mockLeads}
-            users={MOCK_USERS}
+            deal={activeDeal as unknown as Deal}
+            leads={leadsAsFull}
+            users={[]}
             onClick={() => {}}
             accentClass={activeStage ? STAGE_CONFIG[activeStage].border : undefined}
           />
