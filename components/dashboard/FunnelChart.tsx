@@ -11,9 +11,9 @@ import {
   Cell,
 } from "recharts"
 import { cn } from "@/lib/utils"
-import type { mockFunnel } from "@/lib/mocks/metrics"
+import type { DealStage } from "@/types"
 
-type FunnelRow = (typeof mockFunnel)[number]
+type FunnelRow = { stage: DealStage; label: string; count: number; value: number }
 
 const STAGE_COLORS: Record<string, string> = {
   novo:       "#94a3b8",
