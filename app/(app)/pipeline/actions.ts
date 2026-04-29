@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { getActiveWorkspaceId } from "@/lib/workspace"
 import type { Deal, DealStage } from "@/types"
-import type { DealRow } from "@/types/supabase"
+import type { DealRow, Database } from "@/types/supabase"
+
+type DealUpdate = Database["public"]["Tables"]["deals"]["Update"]
 
 export type DealInput = {
   title: string
@@ -14,7 +16,7 @@ export type DealInput = {
   stage: DealStage
 }
 
-export type DealWithLead = Deal & { lead_name: string | null }
+export type DealWithLead = Deal & { lead_name: string | null; created_at?: string }
 
 type DealRowWithLead = DealRow & { leads: { name: string } | null }
 
@@ -68,7 +70,7 @@ export async function createDeal(input: DealInput): Promise<{ error?: string }> 
 
 export async function updateDeal(id: string, input: Partial<DealInput>): Promise<{ error?: string }> {
   const supabase = await createClient()
-  const patch: Record<string, unknown> = {}
+  const patch: DealUpdate = {}
   if (input.title !== undefined) patch.title = input.title
   if (input.value !== undefined) patch.value = input.value
   if (input.lead_id !== undefined) patch.lead_id = input.lead_id || null

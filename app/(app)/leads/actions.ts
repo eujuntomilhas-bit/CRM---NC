@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache"
 import { createClient } from "@/lib/supabase/server"
 import { getActiveWorkspaceId } from "@/lib/workspace"
 import type { Lead, LeadStatus } from "@/types"
-import type { LeadRow } from "@/types/supabase"
+import type { LeadRow, Database } from "@/types/supabase"
+
+type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"]
 
 export type LeadFilters = {
   search?: string
@@ -85,7 +87,7 @@ export async function createLead(input: LeadInput): Promise<{ error?: string }> 
 
 export async function updateLead(id: string, input: Partial<LeadInput>): Promise<{ error?: string }> {
   const supabase = await createClient()
-  const patch: Record<string, unknown> = {}
+  const patch: LeadUpdate = {}
   if (input.name !== undefined) patch.name = input.name
   if (input.email !== undefined) patch.email = input.email || null
   if (input.phone !== undefined) patch.phone = input.phone || null

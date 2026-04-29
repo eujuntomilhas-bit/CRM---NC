@@ -68,7 +68,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     supabase
       .from("deals")
       .select("id, stage, value")
-      .eq("workspace_id", workspaceId) as Promise<{ data: { id: string; stage: DealStage; value: number }[] | null }>,
+      .eq("workspace_id", workspaceId) as unknown as Promise<{ data: { id: string; stage: DealStage; value: number }[] | null }>,
     supabase
       .from("deals")
       .select("id, title, value, stage, due_date")
@@ -77,7 +77,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .gte("due_date", today)
       .lte("due_date", dueCutoff)
       .order("due_date", { ascending: true })
-      .limit(10) as Promise<{ data: UpcomingDeal[] | null }>,
+      .limit(10) as unknown as Promise<{ data: UpcomingDeal[] | null }>,
   ])
 
   const allDeals = dealsResult.data ?? []

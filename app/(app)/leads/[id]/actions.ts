@@ -6,6 +6,9 @@ import { createClient } from "@/lib/supabase/server"
 import { getActiveWorkspaceId } from "@/lib/workspace"
 import type { Lead, Activity, ActivityType } from "@/types"
 import type { LeadRow, ActivityRow } from "@/types/supabase"
+import type { Database } from "@/types/supabase"
+
+type LeadUpdate = Database["public"]["Tables"]["leads"]["Update"]
 
 export type LeadDetail = Lead & { activities: Activity[] }
 
@@ -29,12 +32,12 @@ export async function getLead(id: string): Promise<LeadDetail | null> {
       .from("leads")
       .select("id, workspace_id, name, email, phone, company, role, status, assignee_id, estimated_value, notes, created_at")
       .eq("id", id)
-      .single() as Promise<{ data: LeadRow | null; error: unknown }>,
+      .single() as unknown as Promise<{ data: LeadRow | null; error: unknown }>,
     supabase
       .from("activities")
       .select("id, workspace_id, lead_id, type, description, author_id, created_at")
       .eq("lead_id", id)
-      .order("created_at", { ascending: false }) as Promise<{ data: ActivityRow[] | null; error: unknown }>,
+      .order("created_at", { ascending: false }) as unknown as Promise<{ data: ActivityRow[] | null; error: unknown }>,
   ])
 
   if (!leadResult.data) return null
@@ -86,7 +89,7 @@ export async function updateLeadDetail(
   input: Partial<Pick<Lead, "name" | "email" | "phone" | "company" | "role" | "status" | "estimated_value" | "notes">>
 ): Promise<{ error?: string }> {
   const supabase = await createClient()
-  const patch: Record<string, unknown> = {}
+  const patch: LeadUpdate = {}
   if (input.name !== undefined) patch.name = input.name
   if (input.email !== undefined) patch.email = input.email || null
   if (input.phone !== undefined) patch.phone = input.phone || null
