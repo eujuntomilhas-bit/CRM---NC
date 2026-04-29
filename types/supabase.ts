@@ -37,6 +37,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       workspace_members: {
         Row: {
@@ -60,6 +61,14 @@ export type Database = {
           role?: 'admin' | 'member'
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'workspace_members_workspace_id_fkey'
+            columns: ['workspace_id']
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          }
+        ]
       }
       leads: {
         Row: {
@@ -107,6 +116,14 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'leads_workspace_id_fkey'
+            columns: ['workspace_id']
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          }
+        ]
       }
       deals: {
         Row: {
@@ -142,6 +159,14 @@ export type Database = {
           due_date?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'deals_workspace_id_fkey'
+            columns: ['workspace_id']
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          }
+        ]
       }
       activities: {
         Row: {
@@ -171,6 +196,14 @@ export type Database = {
           author_id?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'activities_lead_id_fkey'
+            columns: ['lead_id']
+            referencedRelation: 'leads'
+            referencedColumns: ['id']
+          }
+        ]
       }
       invites: {
         Row: {
@@ -200,6 +233,14 @@ export type Database = {
           accepted_at?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'invites_workspace_id_fkey'
+            columns: ['workspace_id']
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
     Views: Record<string, never>
@@ -211,6 +252,10 @@ export type Database = {
       is_workspace_admin: {
         Args: { ws_id: string }
         Returns: boolean
+      }
+      create_workspace_with_admin: {
+        Args: { p_name: string; p_slug: string }
+        Returns: string
       }
     }
     Enums: Record<string, never>

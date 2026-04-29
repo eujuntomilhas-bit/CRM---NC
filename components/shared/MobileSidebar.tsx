@@ -11,8 +11,15 @@ import {
 } from "@/components/ui/sheet"
 import Sidebar from "./Sidebar"
 import Logo from "./Logo"
+import type { User } from "@supabase/supabase-js"
+import type { Workspace } from "@/types"
 
-export default function MobileSidebar() {
+type Props = {
+  user: User | null
+  workspaces: Workspace[]
+}
+
+export default function MobileSidebar({ user, workspaces }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -56,7 +63,7 @@ export default function MobileSidebar() {
 
           {/* click em qualquer link fecha o sheet via bubbling */}
           <div className="h-full" onClick={() => setOpen(false)}>
-            <Sidebar />
+            <Sidebar user={user} workspaces={workspaces} />
           </div>
         </SheetContent>
       </Sheet>

@@ -222,3 +222,73 @@ create policy "invites_select" on invites for select using (is_workspace_member(
 create policy "invites_insert" on invites for insert with check (is_workspace_admin(workspace_id));
 create policy "invites_update" on invites for update using (is_workspace_admin(workspace_id));
 create policy "invites_delete" on invites for delete using (is_workspace_admin(workspace_id));
+
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION 4: RLS Performance Fix + RPC Atômica
+-- ════════════════════════════════════════════════════════════
+-- Usa (select auth.uid()) para cachear a chamada por query,
+-- não por linha. Cria RPC atômica para onboarding.
+
+create or replace function is_workspace_member(ws_id uuid)
+returns boolean
+language sql
+security definer
+stable
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.workspace_members
+    where workspace_id = ws_id
+      and user_id = (select auth.uid())
+  );
+$$;
+
+create or replace function is_workspace_admin(ws_id uuid)
+returns boolean
+language sql
+security definer
+stable
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.workspace_members
+    where workspace_id = ws_id
+      and user_id = (select auth.uid())
+      and role = 'admin'
+  );
+$$;
+
+create or replace function create_workspace_with_admin(
+  p_name text,
+  p_slug text
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_workspace_id uuid;
+  v_user_id uuid;
+begin
+  v_user_id := (select auth.uid());
+
+  if v_user_id is null then
+    raise exception 'not_authenticated';
+  end if;
+
+  insert into public.workspaces (name, slug, plan)
+  values (p_name, p_slug, 'free')
+  returning id into v_workspace_id;
+
+  insert into public.workspace_members (workspace_id, user_id, role)
+  values (v_workspace_id, v_user_id, 'admin');
+
+  return v_workspace_id;
+end;
+$$;
+
+grant execute on function create_workspace_with_admin(text, text) to authenticated;
