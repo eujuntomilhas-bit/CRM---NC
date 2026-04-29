@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
-import { MOCK_USERS } from "@/lib/mocks/leads"
 import type { Lead } from "@/types"
 
 type FormData = Omit<Lead, "id" | "workspace_id" | "created_at">
@@ -26,7 +25,7 @@ function validate(data: FormData): Errors {
 
 const EMPTY: FormData = {
   name: "", email: "", phone: "", company: "", role: "",
-  status: "novo", assignee_id: "u1", estimated_value: 0, notes: "",
+  status: "novo", assignee_id: "", estimated_value: 0, notes: "",
 }
 
 type Props = {
@@ -131,17 +130,6 @@ export default function LeadForm({ open, lead, onClose, onSave }: Props) {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label>Responsável</Label>
-              <Select value={form.assignee_id} onValueChange={(v) => set("assignee_id", v ?? "u1")} disabled={pending}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {MOCK_USERS.map((u) => (
-                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <div className="space-y-1.5">

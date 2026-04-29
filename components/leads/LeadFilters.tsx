@@ -3,19 +3,16 @@
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Search } from "lucide-react"
-import { MOCK_USERS } from "@/lib/mocks/leads"
 import type { Lead } from "@/types"
 
 type Props = {
   search: string
   status: Lead["status"] | "todos"
-  assignee: string
   onSearchChange: (v: string) => void
   onStatusChange: (v: Lead["status"] | "todos") => void
-  onAssigneeChange: (v: string) => void
 }
 
-export default function LeadFilters({ search, status, assignee, onSearchChange, onStatusChange, onAssigneeChange }: Props) {
+export default function LeadFilters({ search, status, onSearchChange, onStatusChange }: Props) {
   return (
     <div className="flex flex-wrap gap-3">
       <div className="relative min-w-48 flex-1">
@@ -40,18 +37,6 @@ export default function LeadFilters({ search, status, assignee, onSearchChange, 
           <SelectItem value="negociacao">Negociação</SelectItem>
           <SelectItem value="ganho">Ganho</SelectItem>
           <SelectItem value="perdido">Perdido</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <Select value={assignee} onValueChange={(v) => onAssigneeChange(v ?? "todos")}>
-        <SelectTrigger className="w-44">
-          <SelectValue placeholder="Responsável" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="todos">Todos</SelectItem>
-          {MOCK_USERS.map((u) => (
-            <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-          ))}
         </SelectContent>
       </Select>
     </div>

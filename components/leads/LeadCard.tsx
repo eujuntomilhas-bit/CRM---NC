@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Pencil, Trash2, Building2, Phone, Mail } from "lucide-react"
 import type { Lead } from "@/types"
-import { MOCK_USERS } from "@/lib/mocks/leads"
 
 export const STATUS_CONFIG: Record<Lead["status"], { label: string; className: string }> = {
   novo:       { label: "Novo",       className: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300" },
@@ -22,7 +21,6 @@ type Props = {
 }
 
 export default function LeadCard({ lead, onEdit, onDelete }: Props) {
-  const assignee = MOCK_USERS.find((u) => u.id === lead.assignee_id)
   const status = STATUS_CONFIG[lead.status]
   const initials = lead.name.split(" ").map((n) => n[0]).slice(0, 2).join("")
 
@@ -38,16 +36,13 @@ export default function LeadCard({ lead, onEdit, onDelete }: Props) {
             <Badge className={`text-xs font-medium border-0 ${status.className}`}>{status.label}</Badge>
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Building2 className="size-3" />{lead.company}</span>
-            <span className="truncate">{lead.role}</span>
+            {lead.company && <span className="flex items-center gap-1"><Building2 className="size-3" />{lead.company}</span>}
+            {lead.role && <span className="truncate">{lead.role}</span>}
           </div>
           <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Mail className="size-3" />{lead.email}</span>
-            <span className="flex items-center gap-1"><Phone className="size-3" />{lead.phone}</span>
+            {lead.email && <span className="flex items-center gap-1"><Mail className="size-3" />{lead.email}</span>}
+            {lead.phone && <span className="flex items-center gap-1"><Phone className="size-3" />{lead.phone}</span>}
           </div>
-          {assignee && (
-            <p className="text-xs text-muted-foreground">Responsável: {assignee.name}</p>
-          )}
         </div>
       </Link>
 
