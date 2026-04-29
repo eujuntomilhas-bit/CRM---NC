@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 type Errors = { email?: string; password?: string; form?: string }
 
@@ -32,9 +33,19 @@ export default function LoginPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
     setPending(true)
-    await new Promise((r) => setTimeout(r, 800))
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
     setPending(false)
+    if (error) {
+      if (error.code === "email_not_confirmed") {
+        router.push(`/confirm-email?email=${encodeURIComponent(email)}`)
+        return
+      }
+      setErrors({ form: "E-mail ou senha incorretos." })
+      return
+    }
     router.push("/dashboard")
+    router.refresh()
   }
 
   return (

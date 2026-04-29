@@ -15,14 +15,23 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { Workspace } from "@/types"
 
-const MOCK_WORKSPACES: Workspace[] = [
-  { id: "1", name: "Minha Empresa", slug: "minha-empresa", plan: "pro" },
-  { id: "2", name: "Freelancer", slug: "freelancer", plan: "free" },
-  { id: "3", name: "Agência Digital", slug: "agencia-digital", plan: "free" },
-]
+type Props = {
+  workspaces: Workspace[]
+}
 
-export default function WorkspaceSwitcher() {
-  const [current, setCurrent] = useState<Workspace>(MOCK_WORKSPACES[0])
+export default function WorkspaceSwitcher({ workspaces }: Props) {
+  const [current, setCurrent] = useState<Workspace | null>(workspaces[0] ?? null)
+
+  if (!current) {
+    return (
+      <button className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted-foreground">
+        <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted">
+          <Building2 className="size-3.5" />
+        </div>
+        <span className="flex-1 truncate text-left">Nenhum workspace</span>
+      </button>
+    )
+  }
 
   return (
     <DropdownMenu>
@@ -46,7 +55,7 @@ export default function WorkspaceSwitcher() {
           <DropdownMenuLabel className="text-xs text-muted-foreground">
             Workspaces
           </DropdownMenuLabel>
-          {MOCK_WORKSPACES.map((ws) => (
+          {workspaces.map((ws) => (
             <DropdownMenuItem
               key={ws.id}
               onClick={() => setCurrent(ws)}

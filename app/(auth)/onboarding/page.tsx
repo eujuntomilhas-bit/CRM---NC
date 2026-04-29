@@ -1,12 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import AuthCard from "@/components/shared/AuthCard"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, ArrowRight, Users } from "lucide-react"
+import { createWorkspace } from "./actions"
 
 type Step = 1 | 2
 
@@ -15,30 +16,23 @@ export default function OnboardingPage() {
   const [step, setStep] = useState<Step>(1)
   const [workspaceName, setWorkspaceName] = useState("")
   const [workspaceError, setWorkspaceError] = useState("")
-  const [inviteEmail, setInviteEmail] = useState("")
-  const [inviteError, setInviteError] = useState("")
-  const [pending, setPending] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   async function handleStep1(e: React.FormEvent) {
     e.preventDefault()
     if (!workspaceName.trim()) { setWorkspaceError("Nome do workspace obrigatório"); return }
     setWorkspaceError("")
-    setPending(true)
-    await new Promise((r) => setTimeout(r, 600))
-    setPending(false)
-    setStep(2)
-  }
 
-  async function handleStep2(e: React.FormEvent) {
-    e.preventDefault()
-    if (inviteEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inviteEmail)) {
-      setInviteError("E-mail inválido"); return
-    }
-    setInviteError("")
-    setPending(true)
-    await new Promise((r) => setTimeout(r, 600))
-    setPending(false)
-    router.push("/dashboard")
+    const formData = new FormData()
+    formData.set("workspaceName", workspaceName)
+
+    startTransition(async () => {
+      const result = await createWorkspace(formData)
+      if (result?.error) {
+        setWorkspaceError(result.error)
+      }
+      // On success, createWorkspace calls redirect("/dashboard") server-side
+    })
   }
 
   return (
@@ -79,7 +73,7 @@ export default function OnboardingPage() {
               value={workspaceName}
               onChange={(e) => setWorkspaceName(e.target.value)}
               aria-invalid={!!workspaceError}
-              disabled={pending}
+              disabled={isPending}
             />
             {workspaceError && <p className="text-xs text-destructive">{workspaceError}</p>}
             <p className="text-xs text-muted-foreground">
@@ -87,8 +81,8 @@ export default function OnboardingPage() {
             </p>
           </div>
 
-          <Button type="submit" className="w-full" disabled={pending}>
-            {pending ? (
+          <Button type="submit" className="w-full" disabled={isPending}>
+            {isPending ? (
               <><Loader2 className="mr-2 size-4 animate-spin" />Criando…</>
             ) : (
               <>Continuar <ArrowRight className="ml-2 size-4" /></>
@@ -98,45 +92,19 @@ export default function OnboardingPage() {
       )}
 
       {step === 2 && (
-        <form onSubmit={handleStep2} noValidate className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="inviteEmail">E-mail do colaborador</Label>
-            <Input
-              id="inviteEmail"
-              type="email"
-              placeholder="colega@empresa.com"
-              autoFocus
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              aria-invalid={!!inviteError}
-              disabled={pending}
-            />
-            {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
-            <p className="text-xs text-muted-foreground">
-              Você poderá convidar mais pessoas depois em Configurações.
-            </p>
-          </div>
-
-          <div className="flex gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              disabled={pending}
-              onClick={() => { if (!pending) router.push("/dashboard") }}
-            >
-              <Users className="mr-2 size-4" />
-              Pular por agora
-            </Button>
-            <Button type="submit" className="flex-1" disabled={pending}>
-              {pending ? (
-                <><Loader2 className="mr-2 size-4 animate-spin" />Enviando…</>
-              ) : (
-                "Enviar convite"
-              )}
-            </Button>
-          </div>
-        </form>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Workspace criado com sucesso! Convide colaboradores depois em Configurações.
+          </p>
+          <Button
+            className="w-full"
+            variant="outline"
+            onClick={() => router.push("/dashboard")}
+          >
+            <Users className="mr-2 size-4" />
+            Ir para o Dashboard
+          </Button>
+        </div>
       )}
     </AuthCard>
   )

@@ -8,6 +8,8 @@ import WorkspaceSwitcher from "./WorkspaceSwitcher"
 import UserMenu from "./UserMenu"
 import Logo from "./Logo"
 import { cn } from "@/lib/utils"
+import type { User } from "@supabase/supabase-js"
+import type { Workspace } from "@/types"
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -16,7 +18,12 @@ const NAV_LINKS = [
   { href: "/settings", label: "Configurações", icon: Settings },
 ]
 
-export default function Sidebar() {
+type Props = {
+  user: User | null
+  workspaces: Workspace[]
+}
+
+export default function Sidebar({ user, workspaces }: Props) {
   const pathname = usePathname()
 
   return (
@@ -28,7 +35,7 @@ export default function Sidebar() {
       <Separator className="bg-sidebar-border" />
 
       <div className="px-3 py-2">
-        <WorkspaceSwitcher />
+        <WorkspaceSwitcher workspaces={workspaces} />
       </div>
 
       <Separator className="bg-sidebar-border" />
@@ -71,7 +78,7 @@ export default function Sidebar() {
       <Separator className="bg-sidebar-border" />
 
       <div className="px-3 py-3">
-        <UserMenu />
+        <UserMenu user={user} />
       </div>
     </aside>
   )

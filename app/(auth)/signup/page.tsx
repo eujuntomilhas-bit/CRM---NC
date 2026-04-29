@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
 type Errors = {
   name?: string
@@ -44,9 +45,21 @@ export default function SignupPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
     setPending(true)
-    await new Promise((r) => setTimeout(r, 800))
+    const supabase = createClient()
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name },
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
+      },
+    })
     setPending(false)
-    router.push("/onboarding")
+    if (error) {
+      setErrors({ form: error.message })
+      return
+    }
+    router.push(`/confirm-email?email=${encodeURIComponent(email)}`)
   }
 
   return (
