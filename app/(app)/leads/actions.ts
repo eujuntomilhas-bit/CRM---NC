@@ -86,6 +86,9 @@ export async function createLead(input: LeadInput): Promise<{ error?: string }> 
 }
 
 export async function updateLead(id: string, input: Partial<LeadInput>): Promise<{ error?: string }> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) return { error: "Workspace não encontrado" }
+
   const supabase = await createClient()
   const patch: LeadUpdate = {}
   if (input.name !== undefined) patch.name = input.name
@@ -97,7 +100,7 @@ export async function updateLead(id: string, input: Partial<LeadInput>): Promise
   if (input.estimated_value !== undefined) patch.estimated_value = input.estimated_value
   if (input.notes !== undefined) patch.notes = input.notes || null
 
-  const { error } = await supabase.from("leads").update(patch).eq("id", id)
+  const { error } = await supabase.from("leads").update(patch).eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/leads")
   revalidatePath(`/leads/${id}`)
@@ -105,8 +108,11 @@ export async function updateLead(id: string, input: Partial<LeadInput>): Promise
 }
 
 export async function deleteLead(id: string): Promise<{ error?: string }> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) return { error: "Workspace não encontrado" }
+
   const supabase = await createClient()
-  const { error } = await supabase.from("leads").delete().eq("id", id)
+  const { error } = await supabase.from("leads").delete().eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/leads")
   return {}

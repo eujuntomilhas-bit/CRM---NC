@@ -8,6 +8,7 @@ import LeadCard from "@/components/leads/LeadCard"
 import LeadFilters from "@/components/leads/LeadFilters"
 import LeadForm from "@/components/leads/LeadForm"
 import { createLead, updateLead, deleteLead, type LeadInput } from "./actions"
+import { toast } from "sonner"
 import type { Lead } from "@/types"
 
 type FormData = Omit<Lead, "id" | "workspace_id" | "created_at">
@@ -63,7 +64,8 @@ export default function LeadsClient({ initialLeads }: Props) {
     if (id) {
       startTransition(async () => {
         updateOptimistic({ type: "update", id, data })
-        await updateLead(id, input)
+        const result = await updateLead(id, input)
+        if (result.error) toast.error(result.error)
       })
     } else {
       const tempLead: Lead = {
@@ -75,7 +77,8 @@ export default function LeadsClient({ initialLeads }: Props) {
       }
       startTransition(async () => {
         updateOptimistic({ type: "add", lead: tempLead })
-        await createLead(input)
+        const result = await createLead(input)
+        if (result.error) toast.error(result.error)
       })
     }
     setFormOpen(false)
@@ -88,7 +91,8 @@ export default function LeadsClient({ initialLeads }: Props) {
     setDeletingLead(null)
     startTransition(async () => {
       updateOptimistic({ type: "delete", id })
-      await deleteLead(id)
+      const result = await deleteLead(id)
+      if (result.error) toast.error(result.error)
     })
   }
 

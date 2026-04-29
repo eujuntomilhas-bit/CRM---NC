@@ -68,17 +68,21 @@ export async function getDashboardData(): Promise<DashboardData> {
     supabase
       .from("deals")
       .select("id, stage, value")
-      .eq("workspace_id", workspaceId) as unknown as Promise<{ data: { id: string; stage: DealStage; value: number }[] | null }>,
+      .eq("workspace_id", workspaceId) as unknown as Promise<{ data: { id: string; stage: DealStage; value: number }[] | null; error: { message: string } | null }>,
     supabase
       .from("deals")
       .select("id, title, value, stage, due_date")
       .eq("workspace_id", workspaceId)
-      .not("stage", "in", "(ganho,perdido)")
+      .not("stage", "in", '("ganho","perdido")')
       .gte("due_date", today)
       .lte("due_date", dueCutoff)
       .order("due_date", { ascending: true })
-      .limit(10) as unknown as Promise<{ data: UpcomingDeal[] | null }>,
+      .limit(10) as unknown as Promise<{ data: UpcomingDeal[] | null; error: { message: string } | null }>,
   ])
+
+  if (leadsResult.error) console.error("[dashboard] leads query:", leadsResult.error.message)
+  if (dealsResult.error) console.error("[dashboard] deals query:", dealsResult.error.message)
+  if (upcomingResult.error) console.error("[dashboard] upcoming query:", upcomingResult.error.message)
 
   const allDeals = dealsResult.data ?? []
   const activeDeals = allDeals.filter((d) => d.stage !== "ganho" && d.stage !== "perdido")

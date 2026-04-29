@@ -69,6 +69,9 @@ export async function createDeal(input: DealInput): Promise<{ error?: string }> 
 }
 
 export async function updateDeal(id: string, input: Partial<DealInput>): Promise<{ error?: string }> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) return { error: "Workspace não encontrado" }
+
   const supabase = await createClient()
   const patch: DealUpdate = {}
   if (input.title !== undefined) patch.title = input.title
@@ -77,23 +80,29 @@ export async function updateDeal(id: string, input: Partial<DealInput>): Promise
   if (input.due_date !== undefined) patch.due_date = input.due_date || null
   if (input.stage !== undefined) patch.stage = input.stage
 
-  const { error } = await supabase.from("deals").update(patch).eq("id", id)
+  const { error } = await supabase.from("deals").update(patch).eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/pipeline")
   return {}
 }
 
 export async function updateDealStage(id: string, stage: DealStage): Promise<{ error?: string }> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) return { error: "Workspace não encontrado" }
+
   const supabase = await createClient()
-  const { error } = await supabase.from("deals").update({ stage }).eq("id", id)
+  const { error } = await supabase.from("deals").update({ stage }).eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/pipeline")
   return {}
 }
 
 export async function deleteDeal(id: string): Promise<{ error?: string }> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) return { error: "Workspace não encontrado" }
+
   const supabase = await createClient()
-  const { error } = await supabase.from("deals").delete().eq("id", id)
+  const { error } = await supabase.from("deals").delete().eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/pipeline")
   return {}

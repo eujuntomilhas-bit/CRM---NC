@@ -23,12 +23,10 @@ import { updateDealStage } from "@/app/(app)/pipeline/actions"
 import type { Deal, DealStage, Lead } from "@/types"
 import type { DealWithLead } from "@/app/(app)/pipeline/actions"
 
-// ssr:false keeps the entire DnD tree (useSortable/useDroppable attrs) out of SSR
 const KanbanColumn = dynamic(() => import("./KanbanColumn"), { ssr: false })
 
 const STAGES = Object.keys(STAGE_CONFIG) as DealStage[]
 
-// Prefer column droppables so empty columns always register.
 const kanbanCollision: CollisionDetection = (args) => {
   const hits = pointerWithin(args)
   if (hits.length > 0) {
@@ -60,6 +58,10 @@ export default function KanbanBoard({
   const dealsRef = useRef<DealWithLead[]>(deals)
   dealsRef.current = deals
 
+  // Guarda o stage original no início do drag, antes de handleDragOver mutar o estado.
+  // Sem isso, dragged.stage em handleDragEnd já reflete o destino e a persistência nunca dispara.
+  const originalStageRef = useRef<DealStage | null>(null)
+
   const [activeId, setActiveId] = useState<string | null>(null)
   const activeDeal = deals.find((d) => d.id === activeId) ?? null
   const activeStage = activeDeal?.stage
@@ -70,6 +72,8 @@ export default function KanbanBoard({
 
   function handleDragStart({ active }: DragStartEvent) {
     setActiveId(active.id as string)
+    const deal = dealsRef.current.find((d) => d.id === active.id)
+    originalStageRef.current = deal?.stage ?? null
   }
 
   function handleDragOver({ active, over }: DragOverEvent) {
@@ -91,7 +95,10 @@ export default function KanbanBoard({
 
   function handleDragEnd({ active, over }: DragEndEvent) {
     setActiveId(null)
-    if (!over) return
+    const originalStage = originalStageRef.current
+    originalStageRef.current = null
+
+    if (!over || !originalStage) return
 
     const current = dealsRef.current
     const dragId = active.id as string
@@ -106,13 +113,14 @@ export default function KanbanBoard({
 
     if (!targetStage) return
 
-    // Stage mudou via onDragOver — só persiste
-    if (targetStage !== dragged.stage) {
-      startTransition(() => { updateDealStage(dragId, dragged.stage) })
+    // Cross-column: o estado local já foi atualizado pelo handleDragOver.
+    // Compara com o stage ORIGINAL (não o atual) para detectar mudança real.
+    if (targetStage !== originalStage) {
+      startTransition(() => { updateDealStage(dragId, targetStage) })
       return
     }
 
-    // Reordenar dentro da mesma coluna
+    // Same-column reorder
     if (dragId === overId) return
     const stageDeals = current.filter((d) => d.stage === targetStage)
     const oldIdx = stageDeals.findIndex((d) => d.id === dragId)
@@ -123,10 +131,8 @@ export default function KanbanBoard({
       ...current.filter((d) => d.stage !== targetStage),
       ...arrayMove(stageDeals, oldIdx, newIdx),
     ])
-    startTransition(() => { updateDealStage(dragId, targetStage) })
   }
 
-  // Leads as Deal["lead_id"] lookup for KanbanColumn compatibility
   const leadsAsFull = leads.map((l) => ({
     id: l.id,
     name: l.name,

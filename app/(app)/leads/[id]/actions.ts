@@ -25,6 +25,9 @@ function rowToActivity(row: ActivityRow): Activity {
 }
 
 export async function getLead(id: string): Promise<LeadDetail | null> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) return null
+
   const supabase = await createClient()
 
   const [leadResult, activitiesResult] = await Promise.all([
@@ -32,11 +35,13 @@ export async function getLead(id: string): Promise<LeadDetail | null> {
       .from("leads")
       .select("id, workspace_id, name, email, phone, company, role, status, assignee_id, estimated_value, notes, created_at")
       .eq("id", id)
+      .eq("workspace_id", workspaceId)
       .single() as unknown as Promise<{ data: LeadRow | null; error: unknown }>,
     supabase
       .from("activities")
       .select("id, workspace_id, lead_id, type, description, author_id, created_at")
       .eq("lead_id", id)
+      .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: false }) as unknown as Promise<{ data: ActivityRow[] | null; error: unknown }>,
   ])
 
@@ -88,6 +93,9 @@ export async function updateLeadDetail(
   id: string,
   input: Partial<Pick<Lead, "name" | "email" | "phone" | "company" | "role" | "status" | "estimated_value" | "notes">>
 ): Promise<{ error?: string }> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) return { error: "Workspace não encontrado" }
+
   const supabase = await createClient()
   const patch: LeadUpdate = {}
   if (input.name !== undefined) patch.name = input.name
@@ -99,7 +107,7 @@ export async function updateLeadDetail(
   if (input.estimated_value !== undefined) patch.estimated_value = input.estimated_value
   if (input.notes !== undefined) patch.notes = input.notes || null
 
-  const { error } = await supabase.from("leads").update(patch).eq("id", id)
+  const { error } = await supabase.from("leads").update(patch).eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath(`/leads/${id}`)
   revalidatePath("/leads")
@@ -107,7 +115,10 @@ export async function updateLeadDetail(
 }
 
 export async function deleteLeadAndRedirect(id: string): Promise<void> {
+  const workspaceId = await getActiveWorkspaceId()
+  if (!workspaceId) redirect("/leads")
+
   const supabase = await createClient()
-  await supabase.from("leads").delete().eq("id", id)
+  await supabase.from("leads").delete().eq("id", id).eq("workspace_id", workspaceId)
   redirect("/leads")
 }

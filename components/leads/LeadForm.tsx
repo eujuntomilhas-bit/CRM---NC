@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import type { Lead } from "@/types"
 
@@ -38,7 +37,6 @@ type Props = {
 export default function LeadForm({ open, lead, onClose, onSave }: Props) {
   const [form, setForm] = useState<FormData>(EMPTY)
   const [errors, setErrors] = useState<Errors>({})
-  const [pending, setPending] = useState(false)
 
   useEffect(() => {
     if (lead) {
@@ -54,14 +52,11 @@ export default function LeadForm({ open, lead, onClose, onSave }: Props) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate(form)
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
-    setPending(true)
-    await new Promise((r) => setTimeout(r, 500))
-    setPending(false)
     onSave(form, lead?.id)
   }
 
@@ -76,35 +71,35 @@ export default function LeadForm({ open, lead, onClose, onSave }: Props) {
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 space-y-1.5">
               <Label htmlFor="lf-name">Nome completo *</Label>
-              <Input id="lf-name" value={form.name} onChange={(e) => set("name", e.target.value)} disabled={pending} aria-invalid={!!errors.name} />
+              <Input id="lf-name" value={form.name} onChange={(e) => set("name", e.target.value)} disabled={false} aria-invalid={!!errors.name} />
               {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="lf-email">E-mail *</Label>
-              <Input id="lf-email" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} disabled={pending} aria-invalid={!!errors.email} />
+              <Input id="lf-email" type="email" value={form.email} onChange={(e) => set("email", e.target.value)} disabled={false} aria-invalid={!!errors.email} />
               {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="lf-phone">Telefone</Label>
-              <Input id="lf-phone" value={form.phone} placeholder="(11) 99999-0000" onChange={(e) => set("phone", e.target.value)} disabled={pending} />
+              <Input id="lf-phone" value={form.phone} placeholder="(11) 99999-0000" onChange={(e) => set("phone", e.target.value)} disabled={false} />
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="lf-company">Empresa *</Label>
-              <Input id="lf-company" value={form.company} onChange={(e) => set("company", e.target.value)} disabled={pending} aria-invalid={!!errors.company} />
+              <Input id="lf-company" value={form.company} onChange={(e) => set("company", e.target.value)} disabled={false} aria-invalid={!!errors.company} />
               {errors.company && <p className="text-xs text-destructive">{errors.company}</p>}
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="lf-role">Cargo</Label>
-              <Input id="lf-role" value={form.role} onChange={(e) => set("role", e.target.value)} disabled={pending} />
+              <Input id="lf-role" value={form.role} onChange={(e) => set("role", e.target.value)} disabled={false} />
             </div>
 
             <div className="space-y-1.5">
               <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => set("status", v as Lead["status"])} disabled={pending}>
+              <Select value={form.status} onValueChange={(v) => set("status", v as Lead["status"])} disabled={false}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="novo">Novo</SelectItem>
@@ -126,8 +121,7 @@ export default function LeadForm({ open, lead, onClose, onSave }: Props) {
                 placeholder="0"
                 value={form.estimated_value || ""}
                 onChange={(e) => set("estimated_value", Number(e.target.value) || 0)}
-                disabled={pending}
-              />
+                              />
             </div>
 
           </div>
@@ -140,15 +134,12 @@ export default function LeadForm({ open, lead, onClose, onSave }: Props) {
               rows={3}
               value={form.notes}
               onChange={(e) => set("notes", e.target.value)}
-              disabled={pending}
-            />
+                          />
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={pending}>Cancelar</Button>
-            <Button type="submit" disabled={pending}>
-              {pending ? <><Loader2 className="mr-2 size-4 animate-spin" />{lead ? "Salvando…" : "Criando…"}</> : lead ? "Salvar" : "Criar lead"}
-            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
+            <Button type="submit">{lead ? "Salvar" : "Criar lead"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
