@@ -50,7 +50,7 @@ export default function LeadDetailClient({ lead: initialLead }: Props) {
   }
 
   async function handleNewActivity(type: ActivityType, description: string) {
-    const temp: Activity = {
+    const newActivity: Activity = {
       id: `temp-${Date.now()}`,
       workspace_id: lead.workspace_id,
       lead_id: lead.id,
@@ -60,8 +60,15 @@ export default function LeadDetailClient({ lead: initialLead }: Props) {
       created_at: new Date().toISOString(),
     }
     startTransition(async () => {
-      addOptimisticActivity(temp)
-      await createActivity(lead.id, type, description)
+      addOptimisticActivity(newActivity)
+      const result = await createActivity(lead.id, type, description)
+      if (!result?.error) {
+        // Atualiza o estado base para que o useOptimistic não reverta ao terminar a transição
+        setLead((prev) => ({
+          ...prev,
+          activities: [newActivity, ...prev.activities],
+        }))
+      }
     })
   }
 

@@ -111,6 +111,7 @@ export async function updateLeadDetail(
   if (error) return { error: error.message }
   revalidatePath(`/leads/${id}`)
   revalidatePath("/leads")
+  revalidatePath("/dashboard")
   return {}
 }
 
@@ -120,5 +121,7 @@ export async function deleteLeadAndRedirect(id: string): Promise<void> {
 
   const supabase = await createClient()
   await supabase.from("leads").delete().eq("id", id).eq("workspace_id", workspaceId)
+  revalidatePath("/leads")
+  revalidatePath("/dashboard")
   redirect("/leads")
 }

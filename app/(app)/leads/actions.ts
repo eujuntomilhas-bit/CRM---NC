@@ -56,7 +56,9 @@ export async function getLeads(filters?: LeadFilters): Promise<Lead[]> {
     q = q.eq("status", filters.status)
   }
   if (filters?.search?.trim()) {
-    q = q.or(`name.ilike.%${filters.search.trim()}%,company.ilike.%${filters.search.trim()}%`)
+    // Escapa caracteres especiais do ILIKE para evitar injeção via padrão
+    const safe = filters.search.trim().replace(/[%_\\]/g, "\\$&")
+    q = q.or(`name.ilike.%${safe}%,company.ilike.%${safe}%`)
   }
 
   const { data } = await q as { data: LeadRow[] | null }
@@ -82,6 +84,7 @@ export async function createLead(input: LeadInput): Promise<{ error?: string }> 
 
   if (error) return { error: error.message }
   revalidatePath("/leads")
+  revalidatePath("/dashboard")
   return {}
 }
 
@@ -104,6 +107,7 @@ export async function updateLead(id: string, input: Partial<LeadInput>): Promise
   if (error) return { error: error.message }
   revalidatePath("/leads")
   revalidatePath(`/leads/${id}`)
+  revalidatePath("/dashboard")
   return {}
 }
 
@@ -115,5 +119,6 @@ export async function deleteLead(id: string): Promise<{ error?: string }> {
   const { error } = await supabase.from("leads").delete().eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/leads")
+  revalidatePath("/dashboard")
   return {}
 }

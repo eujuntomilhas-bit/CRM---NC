@@ -160,9 +160,15 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* Variante sem transform — não cria stacking context, não quebra position:fixed filhos */
+@keyframes fadeSlideUpSafe {
+  from { opacity: 0; translate: 0 14px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
 @keyframes pageEnter {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; translate: 0 8px; }
+  to   { opacity: 1; translate: 0 0; }
 }
 
 @keyframes livePulse {
@@ -180,6 +186,7 @@
 .animate-fade-slide-up-1        { animation: fadeSlideUp 0.4s ease-out 0.1s both; }
 .animate-fade-slide-up-2        { animation: fadeSlideUp 0.4s ease-out 0.2s both; }
 .animate-fade-slide-up-3        { animation: fadeSlideUp 0.4s ease-out 0.3s both; }
+.animate-fade-slide-up-safe     { animation: fadeSlideUpSafe 0.4s ease-out both; }
 
 /* ── Glassmorphism card ── */
 .glass-card {
@@ -212,7 +219,8 @@
   .animate-fade-slide-up,
   .animate-fade-slide-up-1,
   .animate-fade-slide-up-2,
-  .animate-fade-slide-up-3 {
+  .animate-fade-slide-up-3,
+  .animate-fade-slide-up-safe {
     animation: none !important;
   }
   .glass-card:hover {

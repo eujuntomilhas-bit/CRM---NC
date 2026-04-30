@@ -1,41 +1,26 @@
 "use client"
 
-import { useState, useRef, useTransition, useEffect } from "react"
-import dynamic from "next/dynamic"
+import { useState, useRef, useTransition, useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import {
   DndContext,
-  DragOverlay,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
-  rectIntersection,
-  pointerWithin,
+  closestCorners,
   type DragEndEvent,
   type DragStartEvent,
   type DragOverEvent,
-  type CollisionDetection,
 } from "@dnd-kit/core"
-import { arrayMove } from "@dnd-kit/sortable"
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { STAGE_CONFIG } from "./KanbanColumn"
-import { DealCardOverlay } from "./DealCard"
+import KanbanColumn from "./KanbanColumn"
 import { updateDealStage } from "@/app/(app)/pipeline/actions"
 import type { Deal, DealStage, Lead } from "@/types"
 import type { DealWithLead } from "@/app/(app)/pipeline/actions"
 
-const KanbanColumn = dynamic(() => import("./KanbanColumn"), { ssr: false })
-
 const STAGES = Object.keys(STAGE_CONFIG) as DealStage[]
-
-const kanbanCollision: CollisionDetection = (args) => {
-  const hits = pointerWithin(args)
-  if (hits.length > 0) {
-    const col = hits.find((c) => STAGES.includes(c.id as DealStage))
-    if (col) return [col]
-    return hits
-  }
-  return rectIntersection(args)
-}
 
 type Props = {
   initialDeals: DealWithLead[]
@@ -55,42 +40,50 @@ export default function KanbanBoard({
   const [deals, setDeals] = useState<DealWithLead[]>(initialDeals)
   const [, startTransition] = useTransition()
 
-  // Sincroniza quando o Server Component re-renderiza com novos deals (após revalidatePath).
-  // Só atualiza se não houver drag em andamento para não interromper o movimento.
-  const isDragging = useRef(false)
+  const draggingRef = useRef(false)
   useEffect(() => {
-    if (!isDragging.current) {
-      setDeals(initialDeals)
-    }
+    if (!draggingRef.current) setDeals(initialDeals)
   }, [initialDeals])
 
   const dealsRef = useRef<DealWithLead[]>(deals)
   dealsRef.current = deals
-
-  // Guarda o stage original no início do drag, antes de handleDragOver mutar o estado.
-  // Sem isso, dragged.stage em handleDragEnd já reflete o destino e a persistência nunca dispara.
   const originalStageRef = useRef<DealStage | null>(null)
 
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const activeDeal = deals.find((d) => d.id === activeId) ?? null
-  const activeStage = activeDeal?.stage
-
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  // Stable leads array — only recompute when leads prop changes
+  const leadsAsFull = useMemo<Lead[]>(() =>
+    leads.map((l) => ({
+      id: l.id,
+      name: l.name,
+      workspace_id: "",
+      email: "",
+      phone: "",
+      company: "",
+      role: "",
+      status: "novo" as const,
+      assignee_id: "",
+      estimated_value: 0,
+      notes: "",
+      created_at: "",
+    })),
+    [leads]
   )
 
   function handleDragStart({ active }: DragStartEvent) {
-    isDragging.current = true
-    setActiveId(active.id as string)
+    draggingRef.current = true
     const deal = dealsRef.current.find((d) => d.id === active.id)
     originalStageRef.current = deal?.stage ?? null
   }
 
   function handleDragOver({ active, over }: DragOverEvent) {
     if (!over) return
-    const current = dealsRef.current
     const dragId = active.id as string
     const overId = over.id as string
+    const current = dealsRef.current
 
     const dragged = current.find((d) => d.id === dragId)
     if (!dragged) return
@@ -100,12 +93,12 @@ export default function KanbanBoard({
       : current.find((d) => d.id === overId)?.stage
 
     if (!targetStage || dragged.stage === targetStage) return
-    setDeals(current.map((d) => (d.id === dragId ? { ...d, stage: targetStage } : d)))
+
+    setDeals((prev) => prev.map((d) => d.id === dragId ? { ...d, stage: targetStage } : d))
   }
 
   function handleDragEnd({ active, over }: DragEndEvent) {
-    isDragging.current = false
-    setActiveId(null)
+    draggingRef.current = false
     const originalStage = originalStageRef.current
     originalStageRef.current = null
 
@@ -114,7 +107,6 @@ export default function KanbanBoard({
     const current = dealsRef.current
     const dragId = active.id as string
     const overId = over.id as string
-
     const dragged = current.find((d) => d.id === dragId)
     if (!dragged) return
 
@@ -124,55 +116,50 @@ export default function KanbanBoard({
 
     if (!targetStage) return
 
-    // Cross-column: o estado local já foi atualizado pelo handleDragOver.
-    // Compara com o stage ORIGINAL (não o atual) para detectar mudança real.
     if (targetStage !== originalStage) {
-      startTransition(() => { updateDealStage(dragId, targetStage) })
+      // Guarda snapshot para rollback se a persistência falhar
+      const snapshot = dealsRef.current.map((d) => ({ ...d }))
+      startTransition(async () => {
+        const result = await updateDealStage(dragId, targetStage)
+        if (result?.error) {
+          // Reverte para o estado antes do drag
+          setDeals(snapshot)
+          console.error("[pipeline] updateDealStage falhou:", result.error)
+        }
+      })
       return
     }
 
-    // Same-column reorder
     if (dragId === overId) return
     const stageDeals = current.filter((d) => d.stage === targetStage)
     const oldIdx = stageDeals.findIndex((d) => d.id === dragId)
     const newIdx = stageDeals.findIndex((d) => d.id === overId)
     if (oldIdx === -1 || newIdx === -1 || oldIdx === newIdx) return
 
-    setDeals([
-      ...current.filter((d) => d.stage !== targetStage),
+    setDeals((prev) => [
+      ...prev.filter((d) => d.stage !== targetStage),
       ...arrayMove(stageDeals, oldIdx, newIdx),
     ])
   }
 
-  const leadsAsFull = leads.map((l) => ({
-    id: l.id,
-    name: l.name,
-    workspace_id: "",
-    email: "",
-    phone: "",
-    company: "",
-    role: "",
-    status: "novo" as const,
-    assignee_id: "",
-    estimated_value: 0,
-    notes: "",
-    created_at: "",
-  })) satisfies Lead[]
-
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={kanbanCollision}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={cn("flex min-h-0 gap-3 overflow-x-auto pb-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_transparent]", className)}>
+      <div className={cn(
+        "flex min-h-0 gap-3 overflow-x-auto pb-4",
+        "[scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_transparent]",
+        className,
+      )}>
         {STAGES.map((stage, i) => (
           <div
             key={stage}
-            className="animate-fade-slide-up flex min-h-0 flex-col"
-            style={{ animationDelay: `${i * 80}ms`, flex: "0 0 264px" }}
+            className="animate-fade-slide-up-safe flex min-h-0 shrink-0 flex-col"
+            style={{ animationDelay: `${i * 60}ms`, width: 264 }}
           >
             <KanbanColumn
               stage={stage}
@@ -185,18 +172,6 @@ export default function KanbanBoard({
           </div>
         ))}
       </div>
-
-      <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
-        {activeDeal && (
-          <DealCardOverlay
-            deal={activeDeal as unknown as Deal}
-            leads={leadsAsFull}
-            users={[]}
-            onClick={() => {}}
-            accentClass={activeStage ? STAGE_CONFIG[activeStage].border : undefined}
-          />
-        )}
-      </DragOverlay>
     </DndContext>
   )
 }

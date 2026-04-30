@@ -223,7 +223,11 @@ export default function PipelineClient({ initialDeals, leads }: Props) {
                   onValueChange={(v) => setForm((f) => ({ ...f, lead_id: v === "none" ? "" : (v ?? "") }))}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue>
+                      {form.lead_id
+                        ? (leads.find((l) => l.id === form.lead_id)?.name ?? form.lead_id)
+                        : <span className="text-muted-foreground">Nenhum lead</span>}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">

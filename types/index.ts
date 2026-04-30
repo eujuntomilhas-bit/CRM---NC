@@ -12,7 +12,7 @@ export type Lead = {
 }
 export type Deal = {
   id: string; workspace_id: string; lead_id: string; title: string
-  value: number; stage: DealStage; assignee_id: string; due_date: string
+  value: number; stage: DealStage; assignee_id: string; due_date: string; created_at: string
 }
 export type Activity = {
   id: string; workspace_id: string; lead_id: string; type: ActivityType

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { memo, useState, useEffect } from "react"
 import { useDroppable } from "@dnd-kit/core"
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { Plus } from "lucide-react"
@@ -14,11 +14,11 @@ export const STAGE_CONFIG: Record<
   DealStage,
   {
     label: string
-    color: string       // header text + dot
-    bg: string          // subtle column bg tint
-    border: string      // left-border on DealCard
-    glow: string        // drop-zone ring
-    barColor: string    // progress bar fill
+    color: string
+    bg: string
+    border: string
+    glow: string
+    barColor: string
   }
 > = {
   novo: {
@@ -82,7 +82,7 @@ type Props = {
   onClickDeal: (deal: Deal) => void
 }
 
-export default function KanbanColumn({
+const KanbanColumn = memo(function KanbanColumn({
   stage,
   deals,
   leads,
@@ -96,7 +96,6 @@ export default function KanbanColumn({
   const dealIds = deals.map((d) => d.id)
   const barWidth = Math.min(100, (deals.length / MAX_DEALS_VISUAL) * 100)
 
-  // Format currency client-side only to avoid SSR/hydration mismatch
   const [formattedTotal, setFormattedTotal] = useState<string | null>(null)
   useEffect(() => {
     setFormattedTotal(
@@ -110,52 +109,42 @@ export default function KanbanColumn({
 
   return (
     <div className="flex min-h-0 w-full shrink-0 flex-col self-stretch">
-      {/* ── Column header ── */}
+      {/* Header */}
       <div className="mb-2.5 space-y-2 px-0.5">
-        {/* Top row: label + count */}
         <div className="flex items-center justify-between gap-2">
           <h3 className={cn("text-[11px] font-semibold uppercase tracking-[0.08em]", cfg.color)}>
             {cfg.label}
           </h3>
-          <span
-            className={cn(
-              "rounded px-1.5 py-0.5 text-[11px] font-medium tabular-nums",
-              "bg-white/5 text-muted-foreground",
-            )}
-          >
+          <span className="rounded bg-white/5 px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">
             {deals.length}
           </span>
         </div>
 
-        {/* Value: client-only to avoid Intl hydration mismatch */}
         <p className="font-mono text-sm font-semibold tabular-nums text-foreground/70">
           {formattedTotal ?? "—"}
         </p>
 
-        {/* Progress bar */}
+        {/* Progress bar — no transition during drag to avoid layout work */}
         <div className="h-[2px] w-full overflow-hidden rounded-full bg-white/5">
           <div
-            className={cn("h-full rounded-full transition-all duration-500", cfg.barColor)}
+            className={cn("h-full rounded-full", cfg.barColor)}
             style={{ width: `${barWidth}%` }}
           />
         </div>
       </div>
 
-      {/* ── Drop zone ── */}
+      {/* Drop zone */}
       <div
+        ref={setNodeRef}
         className={cn(
-          "flex min-h-[140px] flex-1 flex-col rounded-xl border transition-all duration-150",
+          "flex min-h-[140px] flex-1 flex-col rounded-xl border",
           cfg.bg,
           isOver
             ? cn("ring-1", cfg.glow)
             : "border-border/40",
         )}
       >
-        {/* Scrollable cards area */}
-        <div
-          ref={setNodeRef}
-          className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.1)_transparent]"
-        >
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.1)_transparent]">
           <SortableContext items={dealIds} strategy={verticalListSortingStrategy}>
             {deals.map((deal) => (
               <DealCard
@@ -170,7 +159,6 @@ export default function KanbanColumn({
           </SortableContext>
         </div>
 
-        {/* Add button — always visible at bottom */}
         <button
           onClick={() => onAddDeal(stage)}
           className={cn(
@@ -185,4 +173,6 @@ export default function KanbanColumn({
       </div>
     </div>
   )
-}
+})
+
+export default KanbanColumn

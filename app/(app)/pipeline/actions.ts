@@ -65,6 +65,7 @@ export async function createDeal(input: DealInput): Promise<{ error?: string }> 
 
   if (error) return { error: error.message }
   revalidatePath("/pipeline")
+  revalidatePath("/dashboard")
   return {}
 }
 
@@ -83,6 +84,7 @@ export async function updateDeal(id: string, input: Partial<DealInput>): Promise
   const { error } = await supabase.from("deals").update(patch).eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/pipeline")
+  revalidatePath("/dashboard")
   return {}
 }
 
@@ -94,6 +96,7 @@ export async function updateDealStage(id: string, stage: DealStage): Promise<{ e
   const { error } = await supabase.from("deals").update({ stage }).eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/pipeline")
+  revalidatePath("/dashboard")
   return {}
 }
 
@@ -105,5 +108,6 @@ export async function deleteDeal(id: string): Promise<{ error?: string }> {
   const { error } = await supabase.from("deals").delete().eq("id", id).eq("workspace_id", workspaceId)
   if (error) return { error: error.message }
   revalidatePath("/pipeline")
+  revalidatePath("/dashboard")
   return {}
 }
