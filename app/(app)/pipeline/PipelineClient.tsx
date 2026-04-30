@@ -219,7 +219,7 @@ export default function PipelineClient({ initialDeals, leads }: Props) {
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Lead</Label>
                 <Select
-                  value={form.lead_id}
+                  value={form.lead_id || undefined}
                   onValueChange={(v) => setForm((f) => ({ ...f, lead_id: v ?? "" }))}
                 >
                   <SelectTrigger><SelectValue placeholder="Selecionar lead (opcional)" /></SelectTrigger>
