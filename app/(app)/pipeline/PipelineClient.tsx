@@ -150,7 +150,7 @@ export default function PipelineClient({ initialDeals, leads }: Props) {
         />
       </div>
 
-      {/* Dialog criar / editar */}
+      {/* Dialog criar / editar — key força remontagem ao trocar entre criar/editar */}
       <Dialog open={dialogOpen} onOpenChange={(v) => { if (!v) setDialogOpen(false) }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
