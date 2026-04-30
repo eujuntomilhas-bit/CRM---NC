@@ -1,6 +1,5 @@
 import { Phone, Mail, Calendar, FileText } from "lucide-react"
 import type { Activity } from "@/types"
-import { MOCK_USERS } from "@/lib/mocks/leads"
 
 const ACTIVITY_CONFIG: Record<Activity["type"], { icon: React.ElementType; label: string; color: string }> = {
   call:    { icon: Phone,    label: "Ligação",  color: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-400" },
@@ -35,7 +34,6 @@ export default function ActivityTimeline({ activities }: Props) {
       {sorted.map((activity, i) => {
         const cfg = ACTIVITY_CONFIG[activity.type]
         const Icon = cfg.icon
-        const author = MOCK_USERS.find((u) => u.id === activity.author_id)
         const isLast = i === sorted.length - 1
 
         return (
@@ -56,12 +54,6 @@ export default function ActivityTimeline({ activities }: Props) {
                 </span>
                 <span className="text-xs text-muted-foreground">·</span>
                 <span className="text-xs text-muted-foreground">{formatDate(activity.created_at)}</span>
-                {author && (
-                  <>
-                    <span className="text-xs text-muted-foreground">·</span>
-                    <span className="text-xs text-muted-foreground">{author.name}</span>
-                  </>
-                )}
               </div>
               <p className="text-sm text-foreground leading-relaxed">{activity.description}</p>
             </div>

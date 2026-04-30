@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react"
 import { AlertCircle, CalendarDays, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Deal, DealStage } from "@/types"
-
-const TODAY = new Date("2026-04-27")
+import type { DealStage } from "@/types"
+import type { UpcomingDeal } from "@/app/(app)/dashboard/actions"
 
 const STAGE_LABELS: Record<DealStage, string> = {
   novo:        "Novo Lead",
@@ -25,7 +24,7 @@ const STAGE_COLORS: Record<DealStage, string> = {
   perdido:     "bg-rose-500/20 text-rose-400/80",
 }
 
-type RowProps = { deal: Deal }
+type RowProps = { deal: UpcomingDeal }
 
 function DealRow({ deal }: RowProps) {
   const [fmtValue, setFmtValue] = useState<string | null>(null)
@@ -41,7 +40,7 @@ function DealRow({ deal }: RowProps) {
     )
     if (deal.due_date) {
       const due = new Date(deal.due_date + "T00:00:00")
-      const diff = Math.round((due.getTime() - TODAY.getTime()) / 86400000)
+      const diff = Math.round((due.getTime() - new Date().setHours(0,0,0,0)) / 86400000)
       const label = due.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
       setDueInfo({ label, diff })
     }
@@ -96,7 +95,7 @@ function DealRow({ deal }: RowProps) {
 }
 
 type Props = {
-  deals: Deal[]
+  deals: UpcomingDeal[]
   className?: string
 }
 

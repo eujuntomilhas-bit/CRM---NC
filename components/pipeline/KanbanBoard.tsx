@@ -1,94 +1,89 @@
 "use client"
 
-import { useState, useRef } from "react"
-import dynamic from "next/dynamic"
+import { useState, useRef, useTransition, useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
 import {
   DndContext,
-  DragOverlay,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
-  rectIntersection,
-  pointerWithin,
+  closestCorners,
   type DragEndEvent,
   type DragStartEvent,
   type DragOverEvent,
-  type CollisionDetection,
 } from "@dnd-kit/core"
-import { arrayMove } from "@dnd-kit/sortable"
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable"
 import { STAGE_CONFIG } from "./KanbanColumn"
-import { DealCardOverlay } from "./DealCard"
-import { mockDeals } from "@/lib/mocks/deals"
-import { mockLeads, MOCK_USERS } from "@/lib/mocks/leads"
-import type { Deal, DealStage } from "@/types"
-
-// ssr:false keeps the entire DnD tree (useSortable/useDroppable attrs) out of SSR
-const KanbanColumn = dynamic(() => import("./KanbanColumn"), { ssr: false })
+import KanbanColumn from "./KanbanColumn"
+import { updateDealStage } from "@/app/(app)/pipeline/actions"
+import type { Deal, DealStage, Lead } from "@/types"
+import type { DealWithLead } from "@/app/(app)/pipeline/actions"
 
 const STAGES = Object.keys(STAGE_CONFIG) as DealStage[]
 
-// Prefer column droppables so empty columns always register.
-const kanbanCollision: CollisionDetection = (args) => {
-  const hits = pointerWithin(args)
-  if (hits.length > 0) {
-    const col = hits.find((c) => STAGES.includes(c.id as DealStage))
-    if (col) return [col]
-    return hits
-  }
-  return rectIntersection(args)
-}
-
 type Props = {
+  initialDeals: DealWithLead[]
+  leads: Pick<Lead, "id" | "name">[]
   onAddDeal: (stage: DealStage) => void
-  onClickDeal: (deal: Deal) => void
-  externalDeals?: Deal[]
-  onDealsChange?: (deals: Deal[]) => void
+  onClickDeal: (deal: DealWithLead) => void
   className?: string
 }
 
 export default function KanbanBoard({
+  initialDeals,
+  leads,
   onAddDeal,
   onClickDeal,
-  externalDeals,
-  onDealsChange,
   className,
 }: Props) {
-  // Use internal state when no external deals provided
-  const [internalDeals, setInternalDeals] = useState<Deal[]>(mockDeals)
+  const [deals, setDeals] = useState<DealWithLead[]>(initialDeals)
+  const [, startTransition] = useTransition()
 
-  // The active deal list: external when provided, internal otherwise
-  const deals = externalDeals ?? internalDeals
+  const draggingRef = useRef(false)
+  useEffect(() => {
+    if (!draggingRef.current) setDeals(initialDeals)
+  }, [initialDeals])
 
-  // Sync ref immediately during render (not in useEffect) so drag handlers
-  // always read the most recent deals without async lag
-  const dealsRef = useRef<Deal[]>(deals)
+  const dealsRef = useRef<DealWithLead[]>(deals)
   dealsRef.current = deals
-
-  function updateDeals(next: Deal[]) {
-    if (onDealsChange) onDealsChange(next)
-    else setInternalDeals(next)
-  }
-
-  const [activeId, setActiveId] = useState<string | null>(null)
-  const activeDeal = deals.find((d) => d.id === activeId) ?? null
-  const activeStage = activeDeal?.stage
+  const originalStageRef = useRef<DealStage | null>(null)
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  // Stable leads array — only recompute when leads prop changes
+  const leadsAsFull = useMemo<Lead[]>(() =>
+    leads.map((l) => ({
+      id: l.id,
+      name: l.name,
+      workspace_id: "",
+      email: "",
+      phone: "",
+      company: "",
+      role: "",
+      status: "novo" as const,
+      assignee_id: "",
+      estimated_value: 0,
+      notes: "",
+      created_at: "",
+    })),
+    [leads]
   )
 
   function handleDragStart({ active }: DragStartEvent) {
-    setActiveId(active.id as string)
+    draggingRef.current = true
+    const deal = dealsRef.current.find((d) => d.id === active.id)
+    originalStageRef.current = deal?.stage ?? null
   }
 
-  // Move card to target column in real time while dragging over it.
-  // Reads dealsRef so it always has the current list even mid-drag.
   function handleDragOver({ active, over }: DragOverEvent) {
     if (!over) return
-    const current = dealsRef.current
     const dragId = active.id as string
     const overId = over.id as string
+    const current = dealsRef.current
 
     const dragged = current.find((d) => d.id === dragId)
     if (!dragged) return
@@ -99,18 +94,19 @@ export default function KanbanBoard({
 
     if (!targetStage || dragged.stage === targetStage) return
 
-    updateDeals(current.map((d) => (d.id === dragId ? { ...d, stage: targetStage } : d)))
+    setDeals((prev) => prev.map((d) => d.id === dragId ? { ...d, stage: targetStage } : d))
   }
 
-  // Reorder within same column; cross-column move was done in onDragOver.
   function handleDragEnd({ active, over }: DragEndEvent) {
-    setActiveId(null)
-    if (!over) return
+    draggingRef.current = false
+    const originalStage = originalStageRef.current
+    originalStageRef.current = null
+
+    if (!over || !originalStage) return
 
     const current = dealsRef.current
     const dragId = active.id as string
     const overId = over.id as string
-
     const dragged = current.find((d) => d.id === dragId)
     if (!dragged) return
 
@@ -118,17 +114,30 @@ export default function KanbanBoard({
       ? (overId as DealStage)
       : current.find((d) => d.id === overId)?.stage
 
-    // Only reorder if dropped on a card in the same column
-    if (!targetStage || targetStage !== dragged.stage) return
-    if (dragId === overId) return
+    if (!targetStage) return
 
+    if (targetStage !== originalStage) {
+      // Guarda snapshot para rollback se a persistência falhar
+      const snapshot = dealsRef.current.map((d) => ({ ...d }))
+      startTransition(async () => {
+        const result = await updateDealStage(dragId, targetStage)
+        if (result?.error) {
+          // Reverte para o estado antes do drag
+          setDeals(snapshot)
+          console.error("[pipeline] updateDealStage falhou:", result.error)
+        }
+      })
+      return
+    }
+
+    if (dragId === overId) return
     const stageDeals = current.filter((d) => d.stage === targetStage)
     const oldIdx = stageDeals.findIndex((d) => d.id === dragId)
     const newIdx = stageDeals.findIndex((d) => d.id === overId)
     if (oldIdx === -1 || newIdx === -1 || oldIdx === newIdx) return
 
-    updateDeals([
-      ...current.filter((d) => d.stage !== targetStage),
+    setDeals((prev) => [
+      ...prev.filter((d) => d.stage !== targetStage),
       ...arrayMove(stageDeals, oldIdx, newIdx),
     ])
   }
@@ -136,41 +145,33 @@ export default function KanbanBoard({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={kanbanCollision}
+      collisionDetection={closestCorners}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={cn("flex min-h-0 gap-3 overflow-x-auto pb-4 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_transparent]", className)}>
+      <div className={cn(
+        "flex min-h-0 gap-3 overflow-x-auto pb-4",
+        "[scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_transparent]",
+        className,
+      )}>
         {STAGES.map((stage, i) => (
           <div
             key={stage}
-            className="animate-fade-slide-up flex min-h-0 flex-col"
-            style={{ animationDelay: `${i * 80}ms`, flex: "0 0 264px" }}
+            className="animate-fade-slide-up-safe flex min-h-0 shrink-0 flex-col"
+            style={{ animationDelay: `${i * 60}ms`, width: 264 }}
           >
             <KanbanColumn
               stage={stage}
-              deals={deals.filter((d) => d.stage === stage)}
-              leads={mockLeads}
-              users={MOCK_USERS}
+              deals={deals.filter((d) => d.stage === stage) as unknown as Deal[]}
+              leads={leadsAsFull}
+              users={[]}
               onAddDeal={onAddDeal}
-              onClickDeal={onClickDeal}
+              onClickDeal={(deal) => onClickDeal(deal as unknown as DealWithLead)}
             />
           </div>
         ))}
       </div>
-
-      <DragOverlay dropAnimation={{ duration: 150, easing: "ease" }}>
-        {activeDeal && (
-          <DealCardOverlay
-            deal={activeDeal}
-            leads={mockLeads}
-            users={MOCK_USERS}
-            onClick={() => {}}
-            accentClass={activeStage ? STAGE_CONFIG[activeStage].border : undefined}
-          />
-        )}
-      </DragOverlay>
     </DndContext>
   )
 }
