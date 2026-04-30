@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useTransition } from "react"
+import { useState, useRef, useTransition, useEffect } from "react"
 import dynamic from "next/dynamic"
 import { cn } from "@/lib/utils"
 import {
@@ -55,6 +55,15 @@ export default function KanbanBoard({
   const [deals, setDeals] = useState<DealWithLead[]>(initialDeals)
   const [, startTransition] = useTransition()
 
+  // Sincroniza quando o Server Component re-renderiza com novos deals (após revalidatePath).
+  // Só atualiza se não houver drag em andamento para não interromper o movimento.
+  const isDragging = useRef(false)
+  useEffect(() => {
+    if (!isDragging.current) {
+      setDeals(initialDeals)
+    }
+  }, [initialDeals])
+
   const dealsRef = useRef<DealWithLead[]>(deals)
   dealsRef.current = deals
 
@@ -71,6 +80,7 @@ export default function KanbanBoard({
   )
 
   function handleDragStart({ active }: DragStartEvent) {
+    isDragging.current = true
     setActiveId(active.id as string)
     const deal = dealsRef.current.find((d) => d.id === active.id)
     originalStageRef.current = deal?.stage ?? null
@@ -94,6 +104,7 @@ export default function KanbanBoard({
   }
 
   function handleDragEnd({ active, over }: DragEndEvent) {
+    isDragging.current = false
     setActiveId(null)
     const originalStage = originalStageRef.current
     originalStageRef.current = null

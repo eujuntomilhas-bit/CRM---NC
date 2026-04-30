@@ -219,11 +219,16 @@ export default function PipelineClient({ initialDeals, leads }: Props) {
               <div className="space-y-1.5">
                 <Label className="text-xs text-muted-foreground">Lead</Label>
                 <Select
-                  value={form.lead_id || undefined}
-                  onValueChange={(v) => setForm((f) => ({ ...f, lead_id: v ?? "" }))}
+                  value={form.lead_id || "none"}
+                  onValueChange={(v) => setForm((f) => ({ ...f, lead_id: v === "none" ? "" : (v ?? "") }))}
                 >
-                  <SelectTrigger><SelectValue placeholder="Selecionar lead (opcional)" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">
+                      <span className="text-muted-foreground">Nenhum lead</span>
+                    </SelectItem>
                     {leads.map((lead) => (
                       <SelectItem key={lead.id} value={lead.id}>{lead.name}</SelectItem>
                     ))}
