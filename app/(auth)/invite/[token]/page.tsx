@@ -13,22 +13,20 @@ export default async function InviteAcceptPage({ params }: Props) {
   const { token } = await params
   const supabase = await createClient()
 
-  // Buscar o convite pelo token
-  const { data: invite } = await supabase
-    .from('invites')
-    .select('id, workspace_id, email, role, accepted_at, created_at, workspaces(name)')
-    .eq('token', token)
-    .maybeSingle() as {
-      data: {
-        id: string
-        workspace_id: string
-        email: string
-        role: 'admin' | 'member'
-        accepted_at: string | null
-        created_at: string
-        workspaces: { name: string } | null
-      } | null
-    }
+  // Buscar o convite pelo token via RPC pública (sem RLS — acessível mesmo sem login)
+  const { data: inviteRows } = await supabase
+    .rpc('get_invite_by_token', { p_token: token })
+
+  const inviteRow = inviteRows?.[0] ?? null
+
+  const invite = inviteRow ? {
+    id: inviteRow.id as string,
+    workspace_id: inviteRow.workspace_id as string,
+    email: inviteRow.email as string,
+    role: inviteRow.role as 'admin' | 'member',
+    accepted_at: inviteRow.accepted_at as string | null,
+    workspaces: { name: inviteRow.workspace_name as string },
+  } : null
 
   // Token inválido
   if (!invite) {

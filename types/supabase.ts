@@ -268,6 +268,17 @@ export type Database = {
           created_at: string
         }[]
       }
+      get_invite_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          id: string
+          workspace_id: string
+          email: string
+          role: 'admin' | 'member'
+          accepted_at: string | null
+          workspace_name: string
+        }[]
+      }
     }
     Enums: Record<string, never>
   }
