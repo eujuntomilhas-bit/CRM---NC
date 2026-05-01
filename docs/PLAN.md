@@ -378,27 +378,39 @@ git commit -m "feat(M8): leads data — all mocks replaced with real Supabase qu
 
 ## M9 — Collaboration
 
-**Branch:** `feat/collaboration`
+**Branch:** `main` (commits diretos)
 **Objetivo:** Criar/alternar workspaces, convidar colaboradores por e-mail (Resend), roles Admin/Membro funcionando.
 
 ### Entregas
 
-- [ ] Criar `lib/resend/client.ts` — instância Resend
-- [ ] Criar `lib/resend/templates/invite.tsx` — e-mail HTML com link de aceite
-- [ ] Criar `app/api/invite/route.ts` — POST: insere em `invites` + envia e-mail Resend
-- [ ] Criar `app/(auth)/invite/[token]/page.tsx` — valida token, aceita convite, insere em `workspace_members`
-- [ ] Atualizar `app/(app)/settings/page.tsx`:
+- [x] Criar `lib/resend/client.ts` — instância Resend
+- [x] Criar `lib/resend/templates/invite.tsx` — e-mail HTML com link de aceite
+- [x] Criar `app/api/invite/route.ts` — POST: insere em `invites` + envia e-mail Resend; bloqueia re-convite de membro existente; reutiliza token pendente no reenvio
+- [x] Criar `app/api/invite/accept/route.ts` — aceita convite pós-autenticação, insere em `workspace_members`
+- [x] Criar `app/(auth)/invite/[token]/page.tsx` — valida token via RPC pública, aceita se já logado, redireciona para signup/login
+- [x] Criar `app/(auth)/invite/[token]/InviteAcceptClient.tsx` — tela de boas-vindas com opção signup ou login
+- [x] Criar `supabase/migrations/20240007_invite_public_rpc.sql` — RPC `get_invite_by_token` (security definer, sem auth)
+- [x] Criar `supabase/migrations/20240006_members_view.sql` — RPC `get_workspace_members_with_email` (security definer)
+- [x] Atualizar `app/(app)/settings/page.tsx`:
   - Seção "Workspace": editar nome
-  - Seção "Membros": listar + form de convite por e-mail
+  - Seção "Membros": listar membros com email + convites pendentes + form de convite
   - Seção "Plano": info do plano atual
-- [ ] Conectar `WorkspaceSwitcher.tsx` a query real de `workspace_members`
-- [ ] Persistir workspace ativo em cookie `active_workspace_id`
+  - Filtro: convites pendentes não mostram emails já membros
+- [x] Criar `components/settings/InviteForm.tsx` — form de convite por e-mail com role
+- [x] Criar `components/settings/MemberActions.tsx` — botões remover membro e cancelar convite
+- [x] Criar `components/settings/WorkspaceNameForm.tsx` — form inline para editar nome do workspace
+- [x] Criar `app/(app)/settings/actions.ts` — `updateWorkspaceName`, `removeMember`, `cancelInvite`
+- [x] Conectar `WorkspaceSwitcher.tsx` a query real de `workspace_members`
+- [x] Persistir workspace ativo em cookie `active_workspace_id`
+- [x] Exibir avatars dos membros do workspace na `TopBar` (canto superior direito)
 
-### Commit Final
-```bash
-git add .
-git commit -m "feat(M9): collaboration — workspace CRUD, email invites with Resend, roles"
-```
+### Commits
+- `fix(M9): 5 bugs — middleware /invite, cancelInvite sem auth, email de membro, redirect morto, revalidação`
+- `fix(M9): corrigir layout settings, tipo varchar na RPC, remover logs de debug`
+- `fix(M9): fluxo de convite — tela de boas-vindas, signup/login integrado, aceite após auth`
+- `fix(M9): convite — bloquear email já membro, reutilizar token pendente no reenvio`
+- `fix(M9): buscar convite via RPC pública — resolve "convite inválido" sem login`
+- `feat: exibir avatars dos membros do workspace na TopBar`
 
 ---
 
