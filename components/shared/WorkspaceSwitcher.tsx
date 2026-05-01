@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
+import { useRouter } from "next/navigation"
 import { ChevronsUpDown, Check, Plus, Building2 } from "lucide-react"
 import {
   DropdownMenu,
@@ -17,10 +18,16 @@ import type { Workspace } from "@/types"
 
 type Props = {
   workspaces: Workspace[]
+  activeWorkspaceId?: string | null
 }
 
-export default function WorkspaceSwitcher({ workspaces }: Props) {
-  const [current, setCurrent] = useState<Workspace | null>(workspaces[0] ?? null)
+export default function WorkspaceSwitcher({ workspaces, activeWorkspaceId }: Props) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  const initialCurrent =
+    workspaces.find((w) => w.id === activeWorkspaceId) ?? workspaces[0] ?? null
+  const [current, setCurrent] = useState<Workspace | null>(initialCurrent)
 
   if (!current) {
     return (
@@ -33,9 +40,25 @@ export default function WorkspaceSwitcher({ workspaces }: Props) {
     )
   }
 
+  function switchWorkspace(ws: Workspace) {
+    if (ws.id === current?.id) return
+    setCurrent(ws)
+    startTransition(async () => {
+      await fetch('/api/workspace/switch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspaceId: ws.id }),
+      })
+      router.refresh()
+    })
+  }
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-sidebar-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring">
+      <DropdownMenuTrigger
+        disabled={isPending}
+        className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-sidebar-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring disabled:opacity-60"
+      >
         <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/20">
           <Building2 className="size-3.5 text-primary" />
         </div>
@@ -58,7 +81,7 @@ export default function WorkspaceSwitcher({ workspaces }: Props) {
           {workspaces.map((ws) => (
             <DropdownMenuItem
               key={ws.id}
-              onClick={() => setCurrent(ws)}
+              onClick={() => switchWorkspace(ws)}
               className="gap-2"
             >
               <div className="flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-[10px] font-bold uppercase text-muted-foreground">

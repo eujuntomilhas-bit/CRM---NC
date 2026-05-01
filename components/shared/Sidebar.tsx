@@ -21,9 +21,10 @@ const NAV_LINKS = [
 type Props = {
   user: User | null
   workspaces: Workspace[]
+  activeWorkspaceId?: string | null
 }
 
-export default function Sidebar({ user, workspaces }: Props) {
+export default function Sidebar({ user, workspaces, activeWorkspaceId }: Props) {
   const pathname = usePathname()
 
   return (
@@ -35,7 +36,7 @@ export default function Sidebar({ user, workspaces }: Props) {
       <Separator className="bg-sidebar-border" />
 
       <div className="px-3 py-2">
-        <WorkspaceSwitcher workspaces={workspaces} />
+        <WorkspaceSwitcher workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
       </div>
 
       <Separator className="bg-sidebar-border" />

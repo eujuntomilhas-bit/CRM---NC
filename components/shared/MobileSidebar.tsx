@@ -17,9 +17,10 @@ import type { Workspace } from "@/types"
 type Props = {
   user: User | null
   workspaces: Workspace[]
+  activeWorkspaceId?: string | null
 }
 
-export default function MobileSidebar({ user, workspaces }: Props) {
+export default function MobileSidebar({ user, workspaces, activeWorkspaceId }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -63,7 +64,7 @@ export default function MobileSidebar({ user, workspaces }: Props) {
 
           {/* click em qualquer link fecha o sheet via bubbling */}
           <div className="h-full" onClick={() => setOpen(false)}>
-            <Sidebar user={user} workspaces={workspaces} />
+            <Sidebar user={user} workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
           </div>
         </SheetContent>
       </Sheet>
