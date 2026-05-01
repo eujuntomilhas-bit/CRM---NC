@@ -257,6 +257,17 @@ export type Database = {
         Args: { p_name: string; p_slug: string }
         Returns: string
       }
+      get_workspace_members_with_email: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          id: string
+          workspace_id: string
+          user_id: string
+          role: 'admin' | 'member'
+          email: string
+          created_at: string
+        }[]
+      }
     }
     Enums: Record<string, never>
   }

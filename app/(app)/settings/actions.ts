@@ -52,16 +52,29 @@ export async function removeMember(workspaceId: string, userId: string) {
   revalidatePath('/settings')
 }
 
-export async function cancelInvite(inviteId: string) {
+export async function cancelInvite(workspaceId: string, inviteId: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Não autorizado')
 
+  // Verificar que o usuário é admin do workspace
+  const { data: membership } = await supabase
+    .from('workspace_members')
+    .select('role')
+    .eq('workspace_id', workspaceId)
+    .eq('user_id', user.id)
+    .single()
+
+  if (!membership || membership.role !== 'admin') {
+    throw new Error('Apenas admins podem cancelar convites')
+  }
+
   const { error } = await supabase
     .from('invites')
     .delete()
     .eq('id', inviteId)
+    .eq('workspace_id', workspaceId)
 
   if (error) throw new Error('Erro ao cancelar convite')
 

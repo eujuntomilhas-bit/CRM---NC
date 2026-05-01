@@ -4,6 +4,9 @@ import type { NextRequest } from 'next/server'
 
 const AUTH_ONLY_ROUTES = ['/login', '/signup', '/forgot-password', '/confirm-email', '/onboarding']
 
+// Rotas públicas que não são nem protegidas nem auth-only
+const PUBLIC_ROUTES = ['/invite']
+
 const PROTECTED_ROUTES = [
   '/dashboard',
   '/leads',
@@ -39,9 +42,10 @@ export async function proxy(request: NextRequest) {
 
   const isProtected = PROTECTED_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))
   const isAuthOnly = AUTH_ONLY_ROUTES.some((r) => pathname.startsWith(r))
+  const isPublic = PUBLIC_ROUTES.some((r) => pathname.startsWith(r))
 
   // Não autenticado tentando acessar rota protegida → /login
-  if (isProtected && !user) {
+  if (isProtected && !user && !isPublic) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)

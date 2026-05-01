@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,6 +16,7 @@ type Props = {
 }
 
 export function InviteForm({ workspaceId, disabled, disabledReason }: Props) {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState<'member' | 'admin'>('member')
   const [isPending, startTransition] = useTransition()
@@ -39,6 +41,7 @@ export function InviteForm({ workspaceId, disabled, disabledReason }: Props) {
       toast.success(`Convite enviado para ${email}`)
       setEmail('')
       setRole('member')
+      router.refresh()
     })
   }
 

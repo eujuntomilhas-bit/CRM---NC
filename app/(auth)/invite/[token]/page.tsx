@@ -87,10 +87,7 @@ export default async function InviteAcceptPage({ params }: Props) {
     .update({ accepted_at: new Date().toISOString() })
     .eq('id', invite.id)
 
-  // Persistir workspace ativo e redirecionar
-  const response = redirect(`/dashboard`)
-
-  return response
+  redirect('/dashboard')
 }
 
 function InviteResult({

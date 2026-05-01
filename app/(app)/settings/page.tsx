@@ -32,24 +32,20 @@ export default async function SettingsPage() {
 
   if (!workspace) return null
 
-  // Buscar membros com seus dados de auth
-  type MemberWithMeta = {
+  // Buscar membros com email via RPC security definer (acessa auth.users com segurança)
+  type MemberWithEmail = {
     id: string
+    workspace_id: string
     user_id: string
     role: 'admin' | 'member'
+    email: string
     created_at: string
   }
 
   const { data: membersRaw } = await supabase
-    .from('workspace_members')
-    .select('id, user_id, role, created_at')
-    .eq('workspace_id', workspaceId)
-    .order('created_at', { ascending: true }) as { data: MemberWithMeta[] | null }
+    .rpc('get_workspace_members_with_email', { p_workspace_id: workspaceId }) as { data: MemberWithEmail[] | null }
 
   const members = membersRaw ?? []
-
-  // Buscar emails dos membros via auth.users (service role não disponível no client, usar metadata)
-  // Os dados de nome/email ficam em auth.users — exposto via RPC ou metadata do usuário atual
   const currentMembership = members.find((m) => m.user_id === user.id)
   const isAdmin = currentMembership?.role === 'admin'
 
@@ -111,12 +107,12 @@ export default async function SettingsPage() {
             <li key={member.id} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/50">
               <Avatar className="size-8">
                 <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                  {member.user_id.slice(0, 2).toUpperCase()}
+                  {(member.email ?? '??').slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {member.user_id === user.id ? user.email : `Membro ${member.user_id.slice(0, 8)}…`}
+                  {member.email}
                 </p>
                 {member.user_id === user.id && (
                   <p className="text-xs text-muted-foreground">Você</p>
@@ -157,7 +153,7 @@ export default async function SettingsPage() {
                   <Badge variant="secondary" className="text-[10px] h-5">
                     {invite.role === 'admin' ? 'Admin' : 'Membro'}
                   </Badge>
-                  {isAdmin && <CancelInviteButton inviteId={invite.id} />}
+                  {isAdmin && <CancelInviteButton workspaceId={workspaceId} inviteId={invite.id} />}
                 </li>
               ))}
             </ul>

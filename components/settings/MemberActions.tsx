@@ -34,13 +34,13 @@ export function RemoveMemberButton({ workspaceId, userId }: { workspaceId: strin
   )
 }
 
-export function CancelInviteButton({ inviteId }: { inviteId: string }) {
+export function CancelInviteButton({ workspaceId, inviteId }: { workspaceId: string; inviteId: string }) {
   const [isPending, startTransition] = useTransition()
 
   function handleCancel() {
     startTransition(async () => {
       try {
-        await cancelInvite(inviteId)
+        await cancelInvite(workspaceId, inviteId)
         toast.success('Convite cancelado')
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Erro ao cancelar convite')
