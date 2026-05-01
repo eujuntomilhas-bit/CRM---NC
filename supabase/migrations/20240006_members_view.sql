@@ -1,14 +1,16 @@
 -- View segura que expõe email dos membros sem acesso direto a auth.users
 -- Executar no SQL Editor do Supabase Dashboard
 
+drop function if exists get_workspace_members_with_email(uuid);
+
 create or replace function get_workspace_members_with_email(p_workspace_id uuid)
 returns table (
-  id         uuid,
+  id           uuid,
   workspace_id uuid,
-  user_id    uuid,
-  role       text,
-  email      text,
-  created_at timestamptz
+  user_id      uuid,
+  role         text,
+  email        varchar(255),
+  created_at   timestamptz
 )
 language plpgsql
 security definer

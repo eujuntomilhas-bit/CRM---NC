@@ -63,7 +63,7 @@ export default async function SettingsPage() {
   const atFreeLimit = workspace.plan === 'free' && totalMembersAndInvites >= FREE_MEMBER_LIMIT
 
   return (
-    <div className="flex-1 overflow-auto space-y-6 max-w-2xl">
+    <div className="flex-1 space-y-6 overflow-auto">
       <div>
         <h2 className="text-lg font-semibold text-foreground">Configurações</h2>
         <p className="text-sm text-muted-foreground">Gerencie seu workspace e conta</p>
