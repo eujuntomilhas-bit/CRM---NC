@@ -18,6 +18,8 @@ type WorkspaceJoinRow = {
   }
 }
 
+type MemberWithEmail = { user_id: string; email: string; role: string }
+
 export default async function AppLayout({ children }: Props) {
   const supabase = await createClient()
 
@@ -25,6 +27,7 @@ export default async function AppLayout({ children }: Props) {
 
   let workspaces: Workspace[] = []
   let activeWorkspaceId: string | null = null
+  let members: MemberWithEmail[] = []
 
   if (user) {
     const { data } = await supabase
@@ -34,6 +37,14 @@ export default async function AppLayout({ children }: Props) {
 
     workspaces = (data ?? []).map((row) => row.workspaces as Workspace)
     activeWorkspaceId = await getActiveWorkspaceId()
+
+    if (activeWorkspaceId) {
+      const { data: membersData } = await supabase
+        .rpc('get_workspace_members_with_email', { p_workspace_id: activeWorkspaceId }) as {
+          data: MemberWithEmail[] | null
+        }
+      members = membersData ?? []
+    }
   }
 
   return (
@@ -43,7 +54,7 @@ export default async function AppLayout({ children }: Props) {
       </div>
       <div className="flex flex-1 flex-col overflow-hidden">
         <MobileSidebar user={user} workspaces={workspaces} activeWorkspaceId={activeWorkspaceId} />
-        <TopBar className="hidden md:flex" />
+        <TopBar className="hidden md:flex" members={members} />
         <main className="flex-1 overflow-hidden p-6 flex flex-col min-h-0 animate-page-enter">{children}</main>
       </div>
     </div>
