@@ -69,29 +69,48 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Verificar se já existe convite pendente para esse email
-  const { data: existingInvite } = await supabase
+  // Verificar se o email já é membro (via convite aceito anteriormente)
+  const { data: acceptedInvite } = await supabase
     .from('invites')
     .select('id')
+    .eq('workspace_id', workspaceId)
+    .eq('email', email)
+    .not('accepted_at', 'is', null)
+    .maybeSingle()
+
+  if (acceptedInvite) {
+    return NextResponse.json({ error: 'Este e-mail já é membro do workspace' }, { status: 409 })
+  }
+
+  // Se já existe convite pendente, reenviar o mesmo token
+  const { data: existingPendingInvite } = await supabase
+    .from('invites')
+    .select('id, token')
     .eq('workspace_id', workspaceId)
     .eq('email', email)
     .is('accepted_at', null)
     .maybeSingle()
 
-  if (existingInvite) {
-    return NextResponse.json({ error: 'Já existe um convite pendente para esse e-mail' }, { status: 409 })
+  let inviteToken: string
+
+  if (existingPendingInvite) {
+    // Reutilizar token existente
+    inviteToken = existingPendingInvite.token
+  } else {
+    // Inserir novo convite
+    const { data: newInvite, error: insertError } = await supabase
+      .from('invites')
+      .insert({ workspace_id: workspaceId, email, role })
+      .select('token')
+      .single()
+
+    if (insertError || !newInvite) {
+      return NextResponse.json({ error: 'Erro ao criar convite' }, { status: 500 })
+    }
+    inviteToken = newInvite.token
   }
 
-  // Inserir convite
-  const { data: invite, error: insertError } = await supabase
-    .from('invites')
-    .insert({ workspace_id: workspaceId, email, role })
-    .select('token')
-    .single()
-
-  if (insertError || !invite) {
-    return NextResponse.json({ error: 'Erro ao criar convite' }, { status: 500 })
-  }
+  const invite = { token: inviteToken }
 
   // Buscar nome do convidador
   const { data: profile } = await supabase.auth.getUser()
