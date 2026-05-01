@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import InviteAcceptClient from './InviteAcceptClient'
 
 type Props = {
   params: Promise<{ token: string }>
@@ -53,41 +54,54 @@ export default async function InviteAcceptPage({ params }: Props) {
     )
   }
 
+  const workspaceName = invite.workspaces?.name ?? 'um workspace'
+
   // Verificar usuário logado
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
-    // Redireciona para login com next apontando de volta para este convite
-    redirect(`/login?next=/invite/${token}`)
+  // Se já está logado com o email correto → aceitar direto
+  if (user && user.email === invite.email) {
+    const { error: memberError } = await supabase
+      .from('workspace_members')
+      .insert({
+        workspace_id: invite.workspace_id,
+        user_id: user.id,
+        role: invite.role,
+      })
+
+    if (memberError && memberError.code !== '23505') {
+      return (
+        <InviteResult
+          icon={<XCircle className="size-12 text-destructive" />}
+          title="Erro ao aceitar convite"
+          description="Ocorreu um erro inesperado. Tente novamente ou entre em contato com o administrador."
+          action={<Link href="/dashboard" className={buttonVariants({ variant: 'outline' })}>Ir para o dashboard</Link>}
+        />
+      )
+    }
+
+    await supabase
+      .from('invites')
+      .update({ accepted_at: new Date().toISOString() })
+      .eq('id', invite.id)
+
+    redirect('/dashboard')
   }
 
-  // Aceitar o convite: inserir em workspace_members e marcar accepted_at
-  const { error: memberError } = await supabase
-    .from('workspace_members')
-    .insert({
-      workspace_id: invite.workspace_id,
-      user_id: user.id,
-      role: invite.role,
-    })
-
-  if (memberError && memberError.code !== '23505') {
-    // 23505 = unique violation (já é membro) — tratar como aceito
-    return (
-      <InviteResult
-        icon={<XCircle className="size-12 text-destructive" />}
-        title="Erro ao aceitar convite"
-        description="Ocorreu um erro inesperado. Tente novamente ou entre em contato com o administrador do workspace."
-        action={<Link href="/dashboard" className={buttonVariants({ variant: 'outline' })}>Ir para o dashboard</Link>}
-      />
-    )
+  // Se está logado com email diferente → fazer logout antes de mostrar a tela
+  if (user && user.email !== invite.email) {
+    await supabase.auth.signOut()
   }
 
-  await supabase
-    .from('invites')
-    .update({ accepted_at: new Date().toISOString() })
-    .eq('id', invite.id)
-
-  redirect('/dashboard')
+  // Mostrar tela de boas-vindas com opção de criar conta ou fazer login
+  return (
+    <InviteAcceptClient
+      token={token}
+      inviteEmail={invite.email}
+      workspaceName={workspaceName}
+      role={invite.role}
+    />
+  )
 }
 
 function InviteResult({
