@@ -42,6 +42,7 @@ export async function createCheckoutSession() {
   }
 
   const session = await stripe.checkout.sessions.create(sessionParams)
+  // redirect() deve ficar fora de try/catch — ele lança uma exceção internamente
   redirect(session.url!)
 }
 
@@ -68,5 +69,6 @@ export async function createPortalSession() {
     return_url: `${APP_URL}/settings`,
   })
 
+  // redirect() deve ficar fora de try/catch — ele lança uma exceção internamente
   redirect(portalSession.url)
 }
