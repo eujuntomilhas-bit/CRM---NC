@@ -8,8 +8,11 @@ import LeadCard from "@/components/leads/LeadCard"
 import LeadFilters from "@/components/leads/LeadFilters"
 import LeadForm from "@/components/leads/LeadForm"
 import { createLead, updateLead, deleteLead, type LeadInput } from "./actions"
+import { createCheckoutSession } from "@/app/(app)/settings/billing-actions"
 import { toast } from "sonner"
-import type { Lead } from "@/types"
+import type { Lead, WorkspacePlan } from "@/types"
+
+const FREE_LEAD_LIMIT = 50
 
 type FormData = Omit<Lead, "id" | "workspace_id" | "created_at">
 
@@ -20,15 +23,18 @@ type OptAction =
 
 type Props = {
   initialLeads: Lead[]
+  plan: WorkspacePlan
 }
 
-export default function LeadsClient({ initialLeads }: Props) {
+export default function LeadsClient({ initialLeads, plan }: Props) {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<Lead["status"] | "todos">("todos")
   const [formOpen, setFormOpen] = useState(false)
   const [editingLead, setEditingLead] = useState<Lead | null>(null)
   const [deletingLead, setDeletingLead] = useState<Lead | null>(null)
+  const [limitModalOpen, setLimitModalOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [upgradePending, startUpgradeTransition] = useTransition()
 
   const [optimisticLeads, updateOptimistic] = useOptimistic(
     initialLeads,
@@ -48,6 +54,25 @@ export default function LeadsClient({ initialLeads }: Props) {
     const matchStatus = statusFilter === "todos" || l.status === statusFilter
     return matchSearch && matchStatus
   })
+
+  function handleNewLead() {
+    if (plan === "free" && optimisticLeads.length >= FREE_LEAD_LIMIT) {
+      setLimitModalOpen(true)
+      return
+    }
+    setEditingLead(null)
+    setFormOpen(true)
+  }
+
+  function handleUpgrade() {
+    startUpgradeTransition(async () => {
+      try {
+        await createCheckoutSession()
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Erro ao iniciar checkout")
+      }
+    })
+  }
 
   async function handleSave(data: FormData, id?: string) {
     const input: LeadInput = {
@@ -105,7 +130,7 @@ export default function LeadsClient({ initialLeads }: Props) {
             {optimisticLeads.length} contato{optimisticLeads.length !== 1 ? "s" : ""} no workspace
           </p>
         </div>
-        <Button onClick={() => { setEditingLead(null); setFormOpen(true) }} disabled={isPending}>
+        <Button onClick={handleNewLead} disabled={isPending}>
           <Plus className="mr-2 size-4" />
           Novo lead
         </Button>
@@ -146,6 +171,7 @@ export default function LeadsClient({ initialLeads }: Props) {
         onSave={handleSave}
       />
 
+      {/* Modal de exclusão */}
       <Dialog open={!!deletingLead} onOpenChange={(v) => { if (!v) setDeletingLead(null) }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -159,6 +185,26 @@ export default function LeadsClient({ initialLeads }: Props) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeletingLead(null)}>Cancelar</Button>
             <Button variant="destructive" onClick={handleDelete}>Excluir</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de limite de leads */}
+      <Dialog open={limitModalOpen} onOpenChange={setLimitModalOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Limite de leads atingido</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            O plano Free permite até {FREE_LEAD_LIMIT} leads. Faça upgrade para Pro para leads ilimitados.
+          </p>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setLimitModalOpen(false)}>
+              Fechar
+            </Button>
+            <Button onClick={handleUpgrade} disabled={upgradePending}>
+              {upgradePending ? "Redirecionando…" : "Assinar Pro — R$49/mês"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
