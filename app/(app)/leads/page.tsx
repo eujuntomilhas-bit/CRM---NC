@@ -34,21 +34,20 @@ export default async function LeadsPage() {
 
   const supabase = await createClient()
 
-  const [leadsResult, workspaceResult] = await Promise.all([
-    supabase
-      .from("leads")
-      .select("id, workspace_id, name, email, phone, company, role, status, assignee_id, estimated_value, notes, created_at")
-      .eq("workspace_id", workspaceId)
-      .order("created_at", { ascending: false }) as Promise<{ data: LeadRow[] | null }>,
-    supabase
-      .from("workspaces")
-      .select("plan")
-      .eq("id", workspaceId)
-      .single(),
-  ])
+  const { data: leadsData } = await supabase
+    .from("leads")
+    .select("id, workspace_id, name, email, phone, company, role, status, assignee_id, estimated_value, notes, created_at")
+    .eq("workspace_id", workspaceId)
+    .order("created_at", { ascending: false }) as { data: LeadRow[] | null }
 
-  const leads = (leadsResult.data ?? []).map(rowToLead)
-  const plan = (workspaceResult.data?.plan ?? "free") as WorkspacePlan
+  const { data: workspaceData } = await supabase
+    .from("workspaces")
+    .select("plan")
+    .eq("id", workspaceId)
+    .single()
+
+  const leads = (leadsData ?? []).map(rowToLead)
+  const plan = (workspaceData?.plan ?? "free") as WorkspacePlan
 
   return <LeadsClient initialLeads={leads} plan={plan} />
 }
