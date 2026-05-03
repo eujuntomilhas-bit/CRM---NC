@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { AlertTriangle, Check, Minus, Zap } from 'lucide-react'
 import { toast } from 'sonner'
-import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { createCheckoutSession, createPortalSession } from '@/app/(app)/settings/billing-actions'
 import type { WorkspacePlan } from '@/types'
 
@@ -36,9 +35,9 @@ export function BillingSection({ plan, isAdmin }: Props) {
   function handleUpgrade() {
     startTransition(async () => {
       try {
-        await createCheckoutSession()
+        const { url } = await createCheckoutSession()
+        window.location.href = url
       } catch (err) {
-        if (isRedirectError(err)) throw err
         toast.error(err instanceof Error ? err.message : 'Erro ao iniciar checkout')
       }
     })
@@ -47,9 +46,9 @@ export function BillingSection({ plan, isAdmin }: Props) {
   function handlePortal() {
     startTransition(async () => {
       try {
-        await createPortalSession()
+        const { url } = await createPortalSession()
+        window.location.href = url
       } catch (err) {
-        if (isRedirectError(err)) throw err
         toast.error(err instanceof Error ? err.message : 'Erro ao abrir portal')
       }
     })

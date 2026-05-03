@@ -9,7 +9,6 @@ import LeadFilters from "@/components/leads/LeadFilters"
 import LeadForm from "@/components/leads/LeadForm"
 import { createLead, updateLead, deleteLead, type LeadInput } from "./actions"
 import { createCheckoutSession } from "@/app/(app)/settings/billing-actions"
-import { isRedirectError } from "next/dist/client/components/redirect-error"
 import { toast } from "sonner"
 import type { Lead, WorkspacePlan } from "@/types"
 
@@ -68,9 +67,9 @@ export default function LeadsClient({ initialLeads, plan }: Props) {
   function handleUpgrade() {
     startUpgradeTransition(async () => {
       try {
-        await createCheckoutSession()
+        const { url } = await createCheckoutSession()
+        window.location.href = url
       } catch (err) {
-        if (isRedirectError(err)) throw err
         toast.error(err instanceof Error ? err.message : "Erro ao iniciar checkout")
       }
     })

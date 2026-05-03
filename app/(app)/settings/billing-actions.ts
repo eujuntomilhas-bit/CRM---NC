@@ -1,6 +1,5 @@
 'use server'
 
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import { stripe } from '@/lib/stripe'
@@ -8,7 +7,7 @@ import { stripe } from '@/lib/stripe'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 const PRO_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!
 
-export async function createCheckoutSession() {
+export async function createCheckoutSession(): Promise<{ url: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Não autorizado')
@@ -42,11 +41,10 @@ export async function createCheckoutSession() {
   }
 
   const session = await stripe.checkout.sessions.create(sessionParams)
-  // redirect() deve ficar fora de try/catch — ele lança uma exceção internamente
-  redirect(session.url!)
+  return { url: session.url! }
 }
 
-export async function createPortalSession() {
+export async function createPortalSession(): Promise<{ url: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Não autorizado')
@@ -69,6 +67,5 @@ export async function createPortalSession() {
     return_url: `${APP_URL}/settings`,
   })
 
-  // redirect() deve ficar fora de try/catch — ele lança uma exceção internamente
-  redirect(portalSession.url)
+  return { url: portalSession.url }
 }
