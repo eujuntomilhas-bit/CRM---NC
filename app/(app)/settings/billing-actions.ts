@@ -59,7 +59,7 @@ export async function createPortalSession(): Promise<{ url: string }> {
     .single()
 
   if (!workspace?.stripe_customer_id) {
-    throw new Error('Nenhuma assinatura encontrada')
+    throw new Error('Cliente Stripe não encontrado. Entre em contato com o suporte.')
   }
 
   const portalSession = await stripe.billingPortal.sessions.create({

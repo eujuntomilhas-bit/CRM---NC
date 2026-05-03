@@ -1,7 +1,7 @@
 export type LeadStatus = 'novo' | 'contato' | 'proposta' | 'negociacao' | 'ganho' | 'perdido'
 export type DealStage = 'novo' | 'contato' | 'proposta' | 'negociacao' | 'ganho' | 'perdido'
 export type ActivityType = 'call' | 'email' | 'meeting' | 'note'
-export type WorkspacePlan = 'free' | 'pro'
+export type WorkspacePlan = 'free' | 'pro' | 'payment_failed'
 export type MemberRole = 'admin' | 'member'
 
 export type Workspace = { id: string; name: string; slug: string; plan: WorkspacePlan }

@@ -4,7 +4,6 @@ import { stripe } from '@/lib/stripe'
 import type { Database } from '@/types/supabase'
 import type Stripe from 'stripe'
 
-// Service-role client: bypasses RLS — only used here for webhook processing
 function createServiceClient() {
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,7 +13,7 @@ function createServiceClient() {
 
 async function setWorkspacePlan(
   workspaceId: string,
-  plan: 'free' | 'pro',
+  plan: 'free' | 'pro' | 'payment_failed',
   stripeCustomerId?: string,
   stripeSubscriptionId?: string | null,
 ) {
@@ -75,21 +74,6 @@ export async function POST(request: NextRequest) {
         break
       }
 
-      case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription
-        const workspaceId = subscription.metadata?.workspace_id
-          ?? await getWorkspaceIdFromCustomer(subscription.customer as string)
-
-        if (!workspaceId) break
-
-        const isActive = subscription.status === 'active' || subscription.status === 'trialing'
-        const plan: 'free' | 'pro' = isActive ? 'pro' : 'free'
-        const subscriptionId = isActive ? subscription.id : null
-
-        await setWorkspacePlan(workspaceId, plan, subscription.customer as string, subscriptionId)
-        break
-      }
-
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription
         const workspaceId = subscription.metadata?.workspace_id
@@ -101,8 +85,18 @@ export async function POST(request: NextRequest) {
         break
       }
 
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+        const customerId = invoice.customer as string
+        const workspaceId = await getWorkspaceIdFromCustomer(customerId)
+
+        if (!workspaceId) break
+
+        await setWorkspacePlan(workspaceId, 'payment_failed', customerId)
+        break
+      }
+
       default:
-        // Ignore unhandled event types
         break
     }
   } catch (err) {
