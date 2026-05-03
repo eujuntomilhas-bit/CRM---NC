@@ -14,7 +14,7 @@ export type Database = {
           id: string
           name: string
           slug: string
-          plan: 'free' | 'pro'
+          plan: 'free' | 'pro' | 'payment_failed'
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           created_at: string
@@ -23,7 +23,7 @@ export type Database = {
           id?: string
           name: string
           slug: string
-          plan?: 'free' | 'pro'
+          plan?: 'free' | 'pro' | 'payment_failed'
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           created_at?: string
@@ -32,7 +32,7 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
-          plan?: 'free' | 'pro'
+          plan?: 'free' | 'pro' | 'payment_failed'
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           created_at?: string

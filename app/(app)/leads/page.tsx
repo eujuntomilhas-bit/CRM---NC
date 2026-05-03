@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { getActiveWorkspaceId } from "@/lib/workspace"
 import LeadsClient from "./LeadsClient"
 import type { LeadRow } from "@/types/supabase"
-import type { Lead } from "@/types"
+import type { Lead, WorkspacePlan } from "@/types"
 
 function rowToLead(row: LeadRow): Lead {
   return {
@@ -33,13 +33,21 @@ export default async function LeadsPage() {
   }
 
   const supabase = await createClient()
-  const { data } = await supabase
+
+  const { data: leadsData } = await supabase
     .from("leads")
     .select("id, workspace_id, name, email, phone, company, role, status, assignee_id, estimated_value, notes, created_at")
     .eq("workspace_id", workspaceId)
     .order("created_at", { ascending: false }) as { data: LeadRow[] | null }
 
-  const leads = (data ?? []).map(rowToLead)
+  const { data: workspaceData } = await supabase
+    .from("workspaces")
+    .select("plan")
+    .eq("id", workspaceId)
+    .single()
 
-  return <LeadsClient initialLeads={leads} />
+  const leads = (leadsData ?? []).map(rowToLead)
+  const plan = (workspaceData?.plan ?? "free") as WorkspacePlan
+
+  return <LeadsClient initialLeads={leads} plan={plan} />
 }
