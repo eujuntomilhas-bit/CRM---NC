@@ -1,12 +1,16 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveWorkspaceId } from '@/lib/workspace'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WorkspaceNameForm } from '@/components/settings/WorkspaceNameForm'
 import { InviteForm } from '@/components/settings/InviteForm'
 import { RemoveMemberButton, CancelInviteButton } from '@/components/settings/MemberActions'
-import { Crown, Users, CreditCard, Clock } from 'lucide-react'
+import { BillingSection } from '@/components/settings/BillingSection'
+import { BillingToast } from '@/components/settings/BillingToast'
+import { Crown, Users, Clock } from 'lucide-react'
 
 const FREE_MEMBER_LIMIT = 2
 
@@ -23,7 +27,6 @@ export default async function SettingsPage() {
     )
   }
 
-  // Buscar workspace
   const { data: workspace } = await supabase
     .from('workspaces')
     .select('id, name, slug, plan')
@@ -32,7 +35,6 @@ export default async function SettingsPage() {
 
   if (!workspace) return null
 
-  // Buscar membros com email via RPC security definer (acessa auth.users com segurança)
   type MemberWithEmail = {
     id: string
     workspace_id: string
@@ -49,7 +51,6 @@ export default async function SettingsPage() {
   const currentMembership = members.find((m) => m.user_id === user.id)
   const isAdmin = currentMembership?.role === 'admin'
 
-  // Buscar convites pendentes
   type InviteRow = { id: string; email: string; role: 'admin' | 'member'; created_at: string }
   const { data: pendingInvites } = await supabase
     .from('invites')
@@ -64,153 +65,137 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex-1 space-y-6 overflow-auto">
+      <Suspense fallback={null}>
+        <BillingToast />
+      </Suspense>
+
       <div>
         <h2 className="text-lg font-semibold text-foreground">Configurações</h2>
         <p className="text-sm text-muted-foreground">Gerencie seu workspace e conta</p>
       </div>
 
-      {/* ── Workspace ── */}
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <Crown className="size-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-foreground">Workspace</h3>
-        </div>
-        <Separator />
-        <WorkspaceNameForm
-          workspaceId={workspace.id}
-          currentName={workspace.name}
-          isAdmin={isAdmin}
-        />
-        <p className="text-xs text-muted-foreground">
-          Slug: <span className="font-mono">{workspace.slug}</span>
-        </p>
-      </section>
+      <Tabs defaultValue="workspace">
+        <TabsList className="mb-4">
+          <TabsTrigger value="workspace">Workspace</TabsTrigger>
+          <TabsTrigger value="membros">Membros</TabsTrigger>
+          <TabsTrigger value="assinatura">Assinatura</TabsTrigger>
+        </TabsList>
 
-      {/* ── Membros ── */}
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Users className="size-4 text-muted-foreground" />
-            <h3 className="text-sm font-semibold text-foreground">Membros</h3>
-          </div>
-          <span className="text-xs text-muted-foreground">
-            {workspace.plan === 'free'
-              ? `${totalMembersAndInvites} / ${FREE_MEMBER_LIMIT} (Free)`
-              : `${members.length} membros`}
-          </span>
-        </div>
-        <Separator />
-
-        {/* Lista de membros */}
-        <ul className="space-y-2">
-          {members.map((member) => (
-            <li key={member.id} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/50">
-              <Avatar className="size-8">
-                <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                  {(member.email ?? '??').slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {member.email}
-                </p>
-                {member.user_id === user.id && (
-                  <p className="text-xs text-muted-foreground">Você</p>
-                )}
-              </div>
-              <Badge
-                variant={member.role === 'admin' ? 'default' : 'secondary'}
-                className="text-[10px] h-5"
-              >
-                {member.role === 'admin' ? 'Admin' : 'Membro'}
-              </Badge>
-              {isAdmin && member.user_id !== user.id && (
-                <RemoveMemberButton workspaceId={workspaceId} userId={member.user_id} />
-              )}
-            </li>
-          ))}
-        </ul>
-
-        {/* Convites pendentes */}
-        {invites.length > 0 && (
-          <>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Convites pendentes
+        {/* ── Aba Workspace ── */}
+        <TabsContent value="workspace">
+          <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <Crown className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Workspace</h3>
+            </div>
+            <Separator />
+            <WorkspaceNameForm
+              workspaceId={workspace.id}
+              currentName={workspace.name}
+              isAdmin={isAdmin}
+            />
+            <p className="text-xs text-muted-foreground">
+              Slug: <span className="font-mono">{workspace.slug}</span>
             </p>
+          </section>
+        </TabsContent>
+
+        {/* ── Aba Membros ── */}
+        <TabsContent value="membros">
+          <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="size-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Membros</h3>
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {workspace.plan === 'free'
+                  ? `${totalMembersAndInvites} / ${FREE_MEMBER_LIMIT} (Free)`
+                  : `${members.length} membros`}
+              </span>
+            </div>
+            <Separator />
+
             <ul className="space-y-2">
-              {invites.map((invite) => (
-                <li key={invite.id} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/50">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                    <Clock className="size-3.5 text-muted-foreground" />
-                  </div>
+              {members.map((member) => (
+                <li key={member.id} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/50">
+                  <Avatar className="size-8">
+                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                      {(member.email ?? '??').slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground truncate">{invite.email}</p>
-                    <p className="text-xs text-muted-foreground">Convite enviado</p>
+                    <p className="text-sm font-medium text-foreground truncate">{member.email}</p>
+                    {member.user_id === user.id && (
+                      <p className="text-xs text-muted-foreground">Você</p>
+                    )}
                   </div>
-                  <Badge variant="outline" className="text-[10px] h-5 border-amber-500/40 text-amber-500">
-                    Pendente
+                  <Badge
+                    variant={member.role === 'admin' ? 'default' : 'secondary'}
+                    className="text-[10px] h-5"
+                  >
+                    {member.role === 'admin' ? 'Admin' : 'Membro'}
                   </Badge>
-                  <Badge variant="secondary" className="text-[10px] h-5">
-                    {invite.role === 'admin' ? 'Admin' : 'Membro'}
-                  </Badge>
-                  {isAdmin && <CancelInviteButton workspaceId={workspaceId} inviteId={invite.id} />}
+                  {isAdmin && member.user_id !== user.id && (
+                    <RemoveMemberButton workspaceId={workspaceId} userId={member.user_id} />
+                  )}
                 </li>
               ))}
             </ul>
-          </>
-        )}
 
-        {/* Formulário de convite */}
-        {isAdmin && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-foreground">Convidar por e-mail</p>
-              <InviteForm
-                workspaceId={workspaceId}
-                disabled={atFreeLimit}
-                disabledReason={
-                  atFreeLimit
-                    ? `Limite de ${FREE_MEMBER_LIMIT} membros atingido no plano Free. Faça upgrade para Pro para convidar mais pessoas.`
-                    : undefined
-                }
-              />
-            </div>
-          </>
-        )}
-      </section>
+            {invites.length > 0 && (
+              <>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Convites pendentes
+                </p>
+                <ul className="space-y-2">
+                  {invites.map((invite) => (
+                    <li key={invite.id} className="flex items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted/50">
+                      <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <Clock className="size-3.5 text-muted-foreground" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-foreground truncate">{invite.email}</p>
+                        <p className="text-xs text-muted-foreground">Convite enviado</p>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] h-5 border-amber-500/40 text-amber-500">
+                        Pendente
+                      </Badge>
+                      <Badge variant="secondary" className="text-[10px] h-5">
+                        {invite.role === 'admin' ? 'Admin' : 'Membro'}
+                      </Badge>
+                      {isAdmin && <CancelInviteButton workspaceId={workspaceId} inviteId={invite.id} />}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
 
-      {/* ── Plano ── */}
-      <section className="rounded-xl border border-border bg-card p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <CreditCard className="size-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-foreground">Plano</h3>
-        </div>
-        <Separator />
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium text-foreground">
-              {workspace.plan === 'pro' ? 'Pro' : 'Free'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {workspace.plan === 'free'
-                ? `Até ${FREE_MEMBER_LIMIT} membros · Leads ilimitados`
-                : 'Membros ilimitados · Todos os recursos'}
-            </p>
-          </div>
-          <Badge
-            variant={workspace.plan === 'pro' ? 'default' : 'secondary'}
-            className="text-xs"
-          >
-            {workspace.plan === 'pro' ? 'Pro' : 'Free'}
-          </Badge>
-        </div>
-        {workspace.plan === 'free' && (
-          <p className="text-xs text-muted-foreground">
-            Upgrade para Pro disponível em breve.
-          </p>
-        )}
-      </section>
+            {isAdmin && (
+              <>
+                <Separator />
+                <div className="space-y-2">
+                  <p className="text-xs font-medium text-foreground">Convidar por e-mail</p>
+                  <InviteForm
+                    workspaceId={workspaceId}
+                    disabled={atFreeLimit}
+                    disabledReason={
+                      atFreeLimit
+                        ? `Limite de ${FREE_MEMBER_LIMIT} membros atingido no plano Free. Faça upgrade para Pro para convidar mais pessoas.`
+                        : undefined
+                    }
+                  />
+                </div>
+              </>
+            )}
+          </section>
+        </TabsContent>
+
+        {/* ── Aba Assinatura ── */}
+        <TabsContent value="assinatura">
+          <BillingSection plan={workspace.plan} isAdmin={isAdmin} />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
