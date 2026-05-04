@@ -35,13 +35,13 @@ export default function LeadCard({ lead, onEdit, onDelete }: Props) {
             <span className="font-medium text-foreground truncate">{lead.name}</span>
             <Badge className={`text-xs font-medium border-0 ${status.className}`}>{status.label}</Badge>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+          <div className="flex flex-col gap-y-0.5 sm:flex-row sm:flex-wrap sm:gap-x-4 text-xs text-muted-foreground">
             {lead.company && <span className="flex items-center gap-1"><Building2 className="size-3" />{lead.company}</span>}
             {lead.role && <span className="truncate">{lead.role}</span>}
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-            {lead.email && <span className="flex items-center gap-1"><Mail className="size-3" />{lead.email}</span>}
-            {lead.phone && <span className="flex items-center gap-1"><Phone className="size-3" />{lead.phone}</span>}
+          <div className="flex flex-col gap-y-0.5 sm:flex-row sm:flex-wrap sm:gap-x-4 text-xs text-muted-foreground">
+            {lead.email && <span className="flex items-center gap-1 truncate"><Mail className="size-3 shrink-0" /><span className="truncate">{lead.email}</span></span>}
+            {lead.phone && <span className="flex items-center gap-1"><Phone className="size-3 shrink-0" />{lead.phone}</span>}
           </div>
         </div>
       </Link>
