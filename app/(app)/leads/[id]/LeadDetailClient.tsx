@@ -12,6 +12,7 @@ import ActivityTimeline from "@/components/leads/ActivityTimeline"
 import { STATUS_CONFIG } from "@/components/leads/LeadCard"
 import { updateLeadDetail, createActivity, type LeadDetail } from "./actions"
 import type { Lead, Activity, ActivityType } from "@/types"
+import { toast } from "sonner"
 
 type FormData = Omit<Lead, "id" | "workspace_id" | "created_at">
 
@@ -41,9 +42,12 @@ export default function LeadDetailClient({ lead: initialLead }: Props) {
         estimated_value: data.estimated_value ?? 0,
         notes: data.notes ?? "",
       })
-      if (!result?.error) {
+      if (result?.error) {
+        toast.error(result.error)
+      } else {
         // Atualiza o estado local para refletir mudanças sem aguardar re-render do server
         setLead((prev) => ({ ...prev, ...data }))
+        toast.success("Lead atualizado")
       }
     })
     setFormOpen(false)
@@ -62,12 +66,15 @@ export default function LeadDetailClient({ lead: initialLead }: Props) {
     startTransition(async () => {
       addOptimisticActivity(newActivity)
       const result = await createActivity(lead.id, type, description)
-      if (!result?.error) {
+      if (result?.error) {
+        toast.error(result.error)
+      } else {
         // Atualiza o estado base para que o useOptimistic não reverta ao terminar a transição
         setLead((prev) => ({
           ...prev,
           activities: [newActivity, ...prev.activities],
         }))
+        toast.success("Atividade registrada")
       }
     })
   }
