@@ -108,7 +108,7 @@ const KanbanColumn = memo(function KanbanColumn({
   }, [totalValue])
 
   return (
-    <div className="flex min-h-0 w-full shrink-0 flex-col self-stretch">
+    <div className="flex min-h-0 w-full min-w-[264px] shrink-0 flex-col self-stretch">
       {/* Header */}
       <div className="mb-2.5 space-y-2 px-0.5">
         <div className="flex items-center justify-between gap-2">

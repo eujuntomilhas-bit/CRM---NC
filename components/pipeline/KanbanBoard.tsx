@@ -152,13 +152,14 @@ export default function KanbanBoard({
     >
       <div className={cn(
         "flex min-h-0 gap-3 overflow-x-auto pb-4",
+        "snap-x snap-mandatory",
         "[scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.12)_transparent]",
         className,
       )}>
         {STAGES.map((stage, i) => (
           <div
             key={stage}
-            className="animate-fade-slide-up-safe flex min-h-0 shrink-0 flex-col"
+            className="animate-fade-slide-up-safe flex min-h-0 shrink-0 flex-col snap-start"
             style={{ animationDelay: `${i * 60}ms`, width: 264 }}
           >
             <KanbanColumn
