@@ -398,3 +398,12 @@ alter table workspaces
 alter table workspaces
   add constraint workspaces_plan_check
   check (plan in ('free', 'pro', 'payment_failed'));
+
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION 9: Security Hardening — token de convite (M11)
+-- ════════════════════════════════════════════════════════════
+-- Aumenta entropia do token de 122 bits (UUID) para 256 bits.
+
+alter table invites
+  alter column token set default encode(gen_random_bytes(32), 'hex');
