@@ -454,20 +454,22 @@ git commit -m "feat(M10): billing — Stripe checkout, webhook, customer portal,
 
 ## M11 — Deploy
 
-**Branch:** `feat/deploy`
+**Branch:** `feat/deploy` → merged em `main` em 2026-05-07
 **Objetivo:** Aplicação em produção no Vercel + Supabase cloud. CI/CD via GitHub. Smoke test de todos os fluxos.
 
 ### Entregas
 
-- [ ] Criar projeto no Supabase Cloud:
-  - `supabase db push --project-ref <ref>` — rodar migrations
-  - Habilitar Auth → Email/Password no Dashboard
-  - Configurar redirect URL: `https://<dominio>.vercel.app/**`
-- [ ] Criar produto no Stripe Dashboard: "CRM-NC Pro", R$49/mês (BRL), copiar `price_id`
-- [ ] Registrar webhook Stripe: `https://<dominio>.vercel.app/api/stripe/webhook`; eventos: `checkout.session.completed`, `customer.subscription.deleted`
-- [ ] Conectar repositório GitHub ao Vercel
-- [ ] Configurar todas as env vars no Vercel (do `.env.local.example`)
-- [ ] Merge em `main` → verificar deploy automático no Vercel
+- [x] Criar projeto no Supabase Cloud:
+  - Migrations aplicadas via SQL Editor (apply_all.sql)
+  - Auth → Email/Password habilitado
+  - Redirect URL configurada
+- [x] Criar produto no Stripe Dashboard: "CRM-NC Pro", R$49/mês (BRL), `price_id` configurado
+- [x] Registrar webhook Stripe com `whsec_` configurado
+- [x] Repositório GitHub conectado ao Vercel (deploy automático em cada push para main)
+- [x] Todas as env vars configuradas no Vercel (Production, Preview e Development)
+- [x] Merge em `main` → deploy automático ativo no Vercel
+- [x] Security headers adicionados ao `next.config.ts`
+- [x] Fluxo de reset de senha conectado ao Supabase Auth (`/reset-password`)
 - [ ] Smoke test produção:
   - [ ] Signup → onboarding → workspace criado
   - [ ] Criar lead → mover no pipeline → registrar atividade
@@ -477,8 +479,5 @@ git commit -m "feat(M10): billing — Stripe checkout, webhook, customer portal,
   - [ ] Customer Portal cancela → volta para Free
   - [ ] Convite por e-mail aceito → membro adicionado
 
-### Commit Final
-```bash
-git add .
-git commit -m "deploy(M11): production — Vercel + Supabase cloud, Stripe configured, smoke test passed"
-```
+### Commits
+- `deploy(M11): production setup — env vars, security headers, reset-password, .gitignore`
