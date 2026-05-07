@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { getActiveWorkspaceId } from "@/lib/workspace"
 import Sidebar from "@/components/shared/Sidebar"
@@ -36,6 +37,9 @@ export default async function AppLayout({ children }: Props) {
       .eq("user_id", user.id) as { data: WorkspaceJoinRow[] | null }
 
     workspaces = (data ?? []).map((row) => row.workspaces as Workspace)
+
+    if (workspaces.length === 0) redirect("/onboarding")
+
     activeWorkspaceId = await getActiveWorkspaceId()
 
     if (activeWorkspaceId) {
