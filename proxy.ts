@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const AUTH_ONLY_ROUTES = ['/login', '/signup', '/forgot-password', '/confirm-email', '/onboarding']
+const AUTH_ONLY_ROUTES = ['/login', '/signup', '/forgot-password', '/confirm-email']
 
 // Rotas públicas que não são nem protegidas nem auth-only
 const PUBLIC_ROUTES = ['/invite']
