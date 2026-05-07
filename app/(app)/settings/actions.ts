@@ -3,6 +3,20 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
+export async function updateProfile(name: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Não autorizado')
+
+  const { error } = await supabase.auth.updateUser({
+    data: { full_name: name },
+  })
+
+  if (error) throw new Error('Erro ao atualizar perfil')
+
+  revalidatePath('/settings')
+}
+
 export async function updateWorkspaceName(workspaceId: string, name: string) {
   const supabase = await createClient()
 

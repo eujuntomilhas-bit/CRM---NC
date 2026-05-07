@@ -10,7 +10,8 @@ import { InviteForm } from '@/components/settings/InviteForm'
 import { RemoveMemberButton, CancelInviteButton } from '@/components/settings/MemberActions'
 import { BillingSection } from '@/components/settings/BillingSection'
 import { BillingToast } from '@/components/settings/BillingToast'
-import { Crown, Users, Clock } from 'lucide-react'
+import { ProfileForm } from '@/components/settings/ProfileForm'
+import { Crown, Users, Clock, UserCircle } from 'lucide-react'
 
 const FREE_MEMBER_LIMIT = 2
 
@@ -75,12 +76,28 @@ export default async function SettingsPage() {
         <p className="text-sm text-muted-foreground">Gerencie seu workspace e conta</p>
       </div>
 
-      <Tabs defaultValue="workspace">
+      <Tabs defaultValue="perfil">
         <TabsList className="mb-4">
+          <TabsTrigger value="perfil">Perfil</TabsTrigger>
           <TabsTrigger value="workspace">Workspace</TabsTrigger>
           <TabsTrigger value="membros">Membros</TabsTrigger>
           <TabsTrigger value="assinatura">Assinatura</TabsTrigger>
         </TabsList>
+
+        {/* ── Aba Perfil ── */}
+        <TabsContent value="perfil">
+          <section className="rounded-xl border border-border bg-card p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <UserCircle className="size-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Meu Perfil</h3>
+            </div>
+            <Separator />
+            <ProfileForm
+              currentName={user.user_metadata?.full_name ?? ''}
+              email={user.email ?? ''}
+            />
+          </section>
+        </TabsContent>
 
         {/* ── Aba Workspace ── */}
         <TabsContent value="workspace">
