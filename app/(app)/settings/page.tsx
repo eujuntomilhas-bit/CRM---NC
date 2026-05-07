@@ -64,7 +64,8 @@ export default async function SettingsPage() {
   const atFreeLimit = workspace.plan === 'free' && totalMembersAndInvites >= FREE_MEMBER_LIMIT
 
   return (
-    <div className="flex-1 space-y-6 overflow-auto">
+    <div className="flex-1 overflow-auto">
+      <div className="mx-auto max-w-2xl space-y-8 p-4 md:p-6">
       <Suspense fallback={null}>
         <BillingToast />
       </Suspense>
@@ -196,6 +197,7 @@ export default async function SettingsPage() {
           <BillingSection plan={workspace.plan} isAdmin={isAdmin} />
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   )
 }

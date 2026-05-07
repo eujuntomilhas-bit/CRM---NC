@@ -19,6 +19,7 @@ import {
 } from "./actions"
 import type { Lead, DealStage } from "@/types"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 type DealForm = {
   title: string
@@ -88,8 +89,13 @@ export default function PipelineClient({ initialDeals, leads }: Props) {
       stage: form.stage,
     }
     startTransition(async () => {
-      if (editingDeal) await updateDeal(editingDeal.id, input)
-      else await createDeal(input)
+      if (editingDeal) {
+        await updateDeal(editingDeal.id, input)
+        toast.success("Negócio atualizado")
+      } else {
+        await createDeal(input)
+        toast.success("Negócio criado")
+      }
     })
     setDialogOpen(false)
   }

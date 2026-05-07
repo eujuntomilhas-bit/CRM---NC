@@ -19,7 +19,7 @@ export async function createCheckoutSession(): Promise<{ url: string }> {
     .from('workspaces')
     .select('id, plan, stripe_customer_id')
     .eq('id', workspaceId)
-    .single()
+    .maybeSingle()
 
   if (!workspace) throw new Error('Workspace não encontrado')
   if (workspace.plan === 'pro') throw new Error('Workspace já está no plano Pro')
@@ -56,7 +56,7 @@ export async function createPortalSession(): Promise<{ url: string }> {
     .from('workspaces')
     .select('stripe_customer_id')
     .eq('id', workspaceId)
-    .single()
+    .maybeSingle()
 
   if (!workspace?.stripe_customer_id) {
     throw new Error('Cliente Stripe não encontrado. Entre em contato com o suporte.')

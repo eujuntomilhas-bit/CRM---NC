@@ -292,3 +292,118 @@ end;
 $$;
 
 grant execute on function create_workspace_with_admin(text, text) to authenticated;
+
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION 5: Índices de convites (M9)
+-- ════════════════════════════════════════════════════════════
+
+create index if not exists invites_workspace_pending_idx
+  on invites(workspace_id)
+  where accepted_at is null;
+
+create index if not exists invites_token_idx
+  on invites(token);
+
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION 6: RPC get_workspace_members_with_email (M9)
+-- ════════════════════════════════════════════════════════════
+
+drop function if exists get_workspace_members_with_email(uuid);
+
+create or replace function get_workspace_members_with_email(p_workspace_id uuid)
+returns table (
+  id           uuid,
+  workspace_id uuid,
+  user_id      uuid,
+  role         text,
+  email        varchar(255),
+  created_at   timestamptz
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not exists (
+    select 1 from public.workspace_members wm
+    where wm.workspace_id = p_workspace_id
+      and wm.user_id = (select auth.uid())
+  ) then
+    raise exception 'Acesso negado';
+  end if;
+
+  return query
+    select
+      wm.id,
+      wm.workspace_id,
+      wm.user_id,
+      wm.role,
+      au.email,
+      wm.created_at
+    from public.workspace_members wm
+    join auth.users au on au.id = wm.user_id
+    where wm.workspace_id = p_workspace_id
+    order by wm.created_at asc;
+end;
+$$;
+
+grant execute on function get_workspace_members_with_email(uuid) to authenticated;
+
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION 7: RPC pública get_invite_by_token (M9)
+-- ════════════════════════════════════════════════════════════
+
+create or replace function get_invite_by_token(p_token text)
+returns table (
+  id             uuid,
+  workspace_id   uuid,
+  email          text,
+  role           text,
+  accepted_at    timestamptz,
+  workspace_name text
+)
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  return query
+    select
+      i.id,
+      i.workspace_id,
+      i.email,
+      i.role,
+      i.accepted_at,
+      w.name as workspace_name
+    from public.invites i
+    join public.workspaces w on w.id = i.workspace_id
+    where i.token = p_token
+    limit 1;
+end;
+$$;
+
+grant execute on function get_invite_by_token(text) to anon, authenticated;
+
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION 8: Constraint payment_failed no plano (M10)
+-- ════════════════════════════════════════════════════════════
+
+alter table workspaces
+  drop constraint if exists workspaces_plan_check;
+
+alter table workspaces
+  add constraint workspaces_plan_check
+  check (plan in ('free', 'pro', 'payment_failed'));
+
+
+-- ════════════════════════════════════════════════════════════
+-- MIGRATION 9: Security Hardening — token de convite (M11)
+-- ════════════════════════════════════════════════════════════
+-- Aumenta entropia do token de 122 bits (UUID) para 256 bits.
+
+alter table invites
+  alter column token set default encode(gen_random_bytes(32), 'hex');

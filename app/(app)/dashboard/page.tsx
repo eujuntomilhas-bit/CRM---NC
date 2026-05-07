@@ -16,7 +16,7 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div className="animate-fade-slide-up">
           <MetricCard icon={<Users className="size-4" />} label="Total de Leads" value={metrics.total_leads} format="number" />
         </div>

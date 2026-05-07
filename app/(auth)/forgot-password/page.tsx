@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2, CheckCircle2 } from "lucide-react"
+import { createClient } from "@/lib/supabase/client"
 
-type Errors = { email?: string }
+type Errors = { email?: string; form?: string }
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -24,8 +25,15 @@ export default function ForgotPasswordPage() {
     if (Object.keys(errs).length > 0) { setErrors(errs); return }
     setErrors({})
     setPending(true)
-    await new Promise((r) => setTimeout(r, 800))
+    const supabase = createClient()
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
+    })
     setPending(false)
+    if (error) {
+      setErrors({ form: "Não foi possível enviar o link. Tente novamente." })
+      return
+    }
     setSent(true)
   }
 
@@ -66,6 +74,12 @@ export default function ForgotPasswordPage() {
           />
           {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
         </div>
+
+        {errors.form && (
+          <p className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {errors.form}
+          </p>
+        )}
 
         <Button type="submit" className="w-full" disabled={pending}>
           {pending ? <><Loader2 className="mr-2 size-4 animate-spin" />Enviando…</> : "Enviar link"}

@@ -92,6 +92,7 @@ export default function LeadsClient({ initialLeads, plan }: Props) {
         updateOptimistic({ type: "update", id, data })
         const result = await updateLead(id, input)
         if (result.error) toast.error(result.error)
+        else toast.success("Lead atualizado")
       })
     } else {
       const tempLead: Lead = {
@@ -105,6 +106,7 @@ export default function LeadsClient({ initialLeads, plan }: Props) {
         updateOptimistic({ type: "add", lead: tempLead })
         const result = await createLead(input)
         if (result.error) toast.error(result.error)
+        else toast.success("Lead criado com sucesso")
       })
     }
     setFormOpen(false)
@@ -119,6 +121,7 @@ export default function LeadsClient({ initialLeads, plan }: Props) {
       updateOptimistic({ type: "delete", id })
       const result = await deleteLead(id)
       if (result.error) toast.error(result.error)
+      else toast.success("Lead removido")
     })
   }
 

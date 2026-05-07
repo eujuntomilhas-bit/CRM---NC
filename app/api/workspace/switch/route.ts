@@ -29,9 +29,10 @@ export async function POST(request: NextRequest) {
   const response = NextResponse.json({ success: true })
   response.cookies.set('active_workspace_id', workspaceId, {
     httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 365, // 1 ano
+    maxAge: 60 * 60 * 24 * 365,
   })
 
   return response
